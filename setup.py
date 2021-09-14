@@ -12,7 +12,7 @@ setup(
     author_email="jupyter@googlegroups.com",
     license="BSD",
     packages=find_packages(),
-    url="https://github.com/yuvipanda/docker-image-cleaner",
+    url="https://github.com/jupyterhub/docker-image-cleaner",
     description="Cleanup old docker images to free up disk space and inodes",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
