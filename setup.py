@@ -1,12 +1,14 @@
-from setuptools import setup, find_packages
 from pathlib import Path
 
-with open(Path(__file__).parent / "requirements.txt") as f:
+from setuptools import find_packages
+from setuptools import setup
+
+with open(Path(__file__).parent / "requirements.in") as f:
     requirements = [l.strip() for l in f.readlines() if not l.strip().startswith("#")]
 
 setup(
     name="docker-image-cleaner",
-    version="0.1.0",
+    version="1.0.0",
     python_requires=">=3.6",
     author="Project Jupyter Contributors",
     author_email="jupyter@googlegroups.com",
