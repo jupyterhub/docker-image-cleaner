@@ -17,8 +17,12 @@ setup(
     packages=find_packages(),
     url="https://github.com/yuvipanda/docker-image-cleaner",
 	description="Cleanup old docker images to free up disk space and inodes",
-    description="An awesome package that does somethin",
     long_description=open("README.md").read(),
     long_description_content_type='text/markdown',
-	install_requires=requirements
+	install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "docker-image-cleaner = docker_image_cleaner.__main__:main",
+		]
+	}
 )

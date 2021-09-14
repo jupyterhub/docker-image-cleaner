@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Clean docker images
 
@@ -249,7 +248,3 @@ def main():
             logging.info(f"Deleted {images_deleted} images in {int(duration)} seconds")
 
         time.sleep(interval)
-
-
-if __name__ == '__main__':
-    main()
