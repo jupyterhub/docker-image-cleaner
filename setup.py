@@ -1,0 +1,24 @@
+from setuptools import setup, find_packages
+from pathlib import Path
+
+with open(Path(__file__).parent / 'requirements.txt') as f:
+    requirements = [
+        l.strip() for l in f.readlines()
+        if not l.strip().startswith('#')
+    ]
+
+setup(
+    name="docker_image_cleaner",
+    version="0.1.0",
+    python_requires=">=3.6",
+    author="Project Jupyter Contributors",
+    author_email="jupyter@googlegroups.com",
+    license="BSD",
+    packages=find_packages(),
+    url="https://github.com/yuvipanda/docker-image-cleaner",
+	description="Cleanup old docker images to free up disk space and inodes",
+    description="An awesome package that does somethin",
+    long_description=open("README.md").read(),
+    long_description_content_type='text/markdown',
+	install_requires=requirements
+)
