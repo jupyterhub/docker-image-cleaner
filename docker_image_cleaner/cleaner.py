@@ -5,11 +5,10 @@ This serves as a substitute for Kubernetes ImageGC
 which has thresholds that are not sufficiently configurable on GKE
 at this time.
 """
-
-from collections import defaultdict
 import logging
 import os
 import time
+from collections import defaultdict
 
 import docker
 import requests
