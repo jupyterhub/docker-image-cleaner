@@ -5,7 +5,7 @@ with open(Path(__file__).parent / "requirements.txt") as f:
     requirements = [l.strip() for l in f.readlines() if not l.strip().startswith("#")]
 
 setup(
-    name="docker_image_cleaner",
+    name="docker-image-cleaner",
     version="0.1.0",
     python_requires=">=3.6",
     author="Project Jupyter Contributors",
