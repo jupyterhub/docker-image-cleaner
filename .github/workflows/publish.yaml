@@ -1,0 +1,86 @@
+# This is a GitHub workflow defining a set of jobs with a set of steps.
+# ref: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
+#
+name: Publish
+
+# Always build releases/images but only publish to PyPI/quay.io on pushed tags
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-publish-package:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: install build package
+        run: |
+          pip install --upgrade pip
+          pip install build
+          pip freeze
+
+      - name: build release
+        run: |
+          python -m build --sdist --wheel .
+          ls -l dist
+
+      - name: publish to pypi
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
+
+  build-and-publish-image:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      # This action will output a list of useful image tags.
+      #
+      # For example, if a tag 1.2.3 is pushed, then this action will output:
+      #
+      #   [{prefix}:1.2.3, {prefix}:1.2, {prefix}:1, {prefix}:latest]
+      #
+      # Then for example, if the tag 1.1.1 is pushed after 1.2.3, then this
+      # action will output:
+      #
+      #   [{prefix}:1.1.1, {prefix}:1.1, {prefix}:1]
+      #
+      # https://github.com/jupyterhub/action-major-minor-tag-calculator
+      - name: Get list of jupyterhub tags
+        id: image-tags
+        uses: jupyterhub/action-major-minor-tag-calculator@v1
+        with:
+          githubToken: "${{ secrets.GITHUB_TOKEN }}"
+          prefix: "quay.io/jupyterhub/docker-image-cleaner:"
+          defaultTag: "quay.io/jupyterhub/docker-image-cleaner:noref"
+          branchRegex: ^\w[\w-.]*$
+
+      - name: Set up QEMU (for docker buildx)
+        uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480
+
+      - name: Set up Docker Buildx (for multi-arch builds)
+        uses: docker/setup-buildx-action@abe5d8f79a1606a2d3e218847032f3f2b1726ab0
+
+      - name: Setup credentials to container registry
+        if: startsWith(github.ref, 'refs/tags/')
+        run: docker login quay.io -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
+
+      - name: Build image (and push on tags)
+        uses: docker/build-push-action@e1b7f96249f2e4c8e4ac1519b9608c0d48944a1f
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ startsWith(github.ref, 'refs/tags/') }}
+          # tags parameter must be a string input so convert `gettags` JSON
+          # array into a comma separated list of tags
+          tags: ${{ join(fromJson(steps.image-tags.outputs.tags)) }}
