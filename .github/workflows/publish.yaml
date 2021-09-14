@@ -76,7 +76,7 @@ jobs:
         run: docker login quay.io -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
 
       - name: Build image (and push on tags)
-        uses: docker/build-push-action@e1b7f96249f2e4c8e4ac1519b9608c0d48944a1f
+        uses: docker/build-push-action@a66e35b9cbcf4ad0ea91ffcaf7bbad63ad9e0229
         with:
           context: .
           platforms: linux/amd64,linux/arm64
