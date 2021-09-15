@@ -129,6 +129,7 @@ def uncordon(kube, node):
 
 
 def main():
+
     node = os.getenv("NODE_NAME")
     if node:
         import kubernetes.config
