@@ -14,7 +14,7 @@ build now docker images.
 ## Why?
 
 Container images are one of the biggest consumers of disk space
-and inodes on kubernetes nodes.  Kubernetes tries to make sure there is enough
+and inodes on kubernetes nodes. Kubernetes tries to make sure there is enough
 disk space on each node by [garbage
 collecting](https://kubernetes.io/docs/concepts/architecture/garbage-collection/#containers-images)
 unused container images and containers. Tuning this is important
@@ -61,11 +61,11 @@ garbage collection in a configurable way.
 
 Currently, environment variables are used to set configuration for now.
 
-| Env variable | Description | Default |
-| - | - | - |
-| `PATH_TO_CHECK` | Path to `/var/lib/docker` directory used by the docker daemon | `/var/lib/docker` |
-| `IMAGE_GC_INTERVAL` | Amount of time (in seconds) to wait between checking if GC needs to be triggered | `300` |
-| `IMAGE_GC_DELAY` | Amount of time (in seconds) to wait between deleting container images, so we don't DOS the docker API | `1` |
-| `IMAGE_GC_THRESHOLD_TYPE` | Determine if GC should be triggered based on relative or absolute disk usage | `relative` |
-| `IMAGE_GC_THRESHOLD_HIGH` | % or absolute disk space available (based on `IMAGE_GC_THRESHOLD_TYPE`) when we start deleting container images | `80` |
-| `IMAGE_GC_THRESHOLD_LOW` | % or absolute disk space available (based on `IMAGE_GC_THRESHOLD_TYPE`) when we can stop deleting container images | `60` |
+| Env variable              | Description                                                                                                        | Default           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `PATH_TO_CHECK`           | Path to `/var/lib/docker` directory used by the docker daemon                                                      | `/var/lib/docker` |
+| `IMAGE_GC_INTERVAL`       | Amount of time (in seconds) to wait between checking if GC needs to be triggered                                   | `300`             |
+| `IMAGE_GC_DELAY`          | Amount of time (in seconds) to wait between deleting container images, so we don't DOS the docker API              | `1`               |
+| `IMAGE_GC_THRESHOLD_TYPE` | Determine if GC should be triggered based on relative or absolute disk usage                                       | `relative`        |
+| `IMAGE_GC_THRESHOLD_HIGH` | % or absolute disk space available (based on `IMAGE_GC_THRESHOLD_TYPE`) when we start deleting container images    | `80`              |
+| `IMAGE_GC_THRESHOLD_LOW`  | % or absolute disk space available (based on `IMAGE_GC_THRESHOLD_TYPE`) when we can stop deleting container images | `60`              |
