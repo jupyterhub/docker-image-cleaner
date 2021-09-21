@@ -8,7 +8,14 @@ with open(Path(__file__).parent / "requirements.in") as f:
 
 setup(
     name="docker-image-cleaner",
-    version="1.0.0",
+    # Write down versions here and make git tags following SemVer 2 like
+    # 1.0.0-alpha.1, they will be automatically converted to PEP440 format
+    # (1.0.0a1) by PyPI.
+    #
+    # PEP440:   https://www.python.org/dev/peps/pep-0440/#semantic-versioning
+    # SemVer 2: https://semver.org
+    #
+    version="1.0.0-alpha.1",
     python_requires=">=3.6",
     author="Project Jupyter Contributors",
     author_email="jupyter@googlegroups.com",
