@@ -2,6 +2,7 @@
 
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jupyterhub/docker-image-cleaner/Publish?logo=github)](https://github.com/jupyterhub/docker-image-cleaner/actions)
 [![Latest PyPI version](https://img.shields.io/pypi/v/docker-image-cleaner?logo=pypi)](https://pypi.python.org/pypi/docker-image-cleaner)
+[![Latest quay.io image tags](https://img.shields.io/github/v/tag/jupyterhub/docker-image-cleaner?include_prereleases&label=quay.io)](https://quay.io/repository/jupyterhub/docker-image-cleaner?tab=tags)
 
 A Python package (`docker-image-cleaner`) and associated Docker image
 (`quay.io/jupyterhub/docker-image-cleaner`) to clean up old docker images when a
