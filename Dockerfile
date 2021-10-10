@@ -16,4 +16,4 @@ RUN ARCH=$(uname -m); \
 COPY . /tmp/cleaner
 RUN pip install --no-cache /tmp/cleaner
 
-ENTRYPOINT [ "/tini", "--", "/usr/local/bin/acme-secret-sync.py" ]
+ENTRYPOINT [ "/tini", "--", "docker-image-cleaner" ]
