@@ -2,7 +2,6 @@
 
 ## 1.0
 
-
 ### 1.0.0-alpha.2 - 2021-10-10
 
 Initial fixes to make it function properly in jupyterhub/binderhub and jupyterhub/mybinder.org-deploy.
