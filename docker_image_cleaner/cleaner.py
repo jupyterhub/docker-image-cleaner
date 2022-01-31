@@ -212,7 +212,7 @@ def main():
                 else:
                     # no name, use id
                     name = image.id
-                gb = image.attrs["Size"] / (2 ** 30)
+                gb = image.attrs["Size"] / (2**30)
                 logging.info(f"Removing {name} (size={gb:.2f}GB)")
                 try:
                     client.images.remove(image=image.id, force=True)
