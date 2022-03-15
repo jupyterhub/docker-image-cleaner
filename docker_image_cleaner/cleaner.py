@@ -1,6 +1,8 @@
 """
 Clean docker images
 
+Calls docker prune when the disk starts getting full.
+
 This serves as a substitute for Kubernetes ImageGC
 which has thresholds that are not sufficiently configurable on GKE
 at this time.
@@ -8,7 +10,6 @@ at this time.
 import logging
 import os
 import time
-from collections import defaultdict
 
 import docker
 import requests
@@ -49,44 +50,6 @@ def get_used_percent(path):
     inodes_avail = stat.f_favail / stat.f_files
     blocks_avail = stat.f_bavail / stat.f_blocks
     return 100 * (1 - min(blocks_avail, inodes_avail))
-
-
-def image_key(image):
-    """Sort key for images
-
-    Prefers untagged images, sorted by size
-    """
-    return (not image.tags, image.attrs["Size"])
-
-
-def get_docker_images(client):
-    """Return list of docker images, sorted by size
-
-    Untagged images will come first
-    """
-    images = client.images.list(all=True)
-    # create dict by image id for O(1) lookup
-    by_id = {image.id: image for image in images}
-    # graph contains a set of all descendant (not just immediate)
-    # images for each image
-    graph = defaultdict(set)
-    for image in images:
-        while image.attrs["Parent"]:
-            graph[image.attrs["Parent"]].add(image)
-            image = by_id[image.attrs["Parent"]]
-
-    def image_key(image):
-        """Sort images topologically and by size
-
-        - Prefer images with fewer descendants, so that we never try to delete
-          an image before its children (fails with 409)
-        - Prefer untagged images to tagged ones (delete build intermediates first)
-        - Sort topological peers by size
-        """
-        return (-len(graph[image.id]), not image.tags, image.attrs["Size"])
-
-    images.sort(key=image_key, reverse=True)
-    return images
 
 
 def cordon(kube, node):
@@ -158,12 +121,7 @@ def main():
     gc_low = float(os.getenv("IMAGE_GC_THRESHOLD_LOW", "60"))
     gc_high = float(os.getenv("IMAGE_GC_THRESHOLD_HIGH", "80"))
 
-    logging.info(
-        f"Pruning docker images when {path_to_check} has {gc_high}% inodes or blocks used"
-    )
-
     client = docker.from_env(version="auto")
-    images = get_docker_images(client)
 
     # with the threshold type set to relative the thresholds are interpreted
     # as a percentage of how full the partition is. In absolute mode the
@@ -173,9 +131,18 @@ def main():
     if gc_threshold_type == "relative":
         get_used = get_used_percent
         used_msg = "{used:.1f}% used"
+        threshold_s = f"{gc_high}% inodes or blocks"
     else:
         get_used = get_absolute_size
-        used_msg = "{used}bytes used"
+        used_msg = "{used // (2**30):.2f}GB used"
+        threshold_s = f"{gc_high // (2**30):.0f}GB"
+
+        if gc_high <= 2**30:
+            raise ValueError(
+                f"Absolute GC threshold should be at least 1GB, got {gc_high}B"
+            )
+
+    logging.info(f"Pruning docker images when {path_to_check} has {threshold_s} used")
 
     while True:
         used = get_used(path_to_check)
@@ -184,72 +151,49 @@ def main():
             # Do nothing! We have enough space
             pass
         else:
-            images = get_docker_images(client)
+            images = client.images.list(all=True)
             if not images:
-                logging.info(f"No images to delete")
+                logging.info("No images to delete")
                 time.sleep(interval)
                 continue
             else:
                 logging.info(f"{len(images)} images available to prune")
 
-            start = time.perf_counter()
-            images_before = len(images)
-
-            if node:
-                cordon(kube, node)
-
-            deleted = 0
-
-            while images and get_used(path_to_check) > gc_low:
-                # Ensure the node is still cordoned
+            for kind in ("containers", "images"):
+                # Ensure the node is cordoned while we prune
                 if node:
                     cordon(kube, node)
-                # Remove biggest image
-                image = images.pop(0)
-                if image.tags:
-                    # does it have a name, e.g. jupyter/base-notebook:12345
-                    name = image.tags[0]
-                else:
-                    # no name, use id
-                    name = image.id
-                gb = image.attrs["Size"] / (2**30)
-                logging.info(f"Removing {name} (size={gb:.2f}GB)")
+                key = f"{kind.title()}Deleted"
+                tic = time.perf_counter()
+                collection = getattr(client, kind)  # client.containers
                 try:
-                    client.images.remove(image=image.id, force=True)
-                    logging.info(f"Removed {name}")
-                    # Delay between deletions.
-                    # A sleep here avoids monopolizing the Docker API with deletions.
-                    time.sleep(delay)
-                except docker.errors.APIError as e:
-                    if e.status_code == 409:
-                        # This means the image can not be removed right now
-                        logging.info(f"Failed to remove {name}, skipping this image")
-                        logging.info(str(e))
-                    elif e.status_code == 404:
-                        logging.info(f"{name} not found, probably already deleted")
-                    else:
-                        if node:
-                            # uncordon before giving up
-                            uncordon(kube, node)
-                        raise
+                    pruned = collection.prune()
                 except requests.exceptions.ReadTimeout:
-                    logging.warning(f"Timeout removing {name}")
+                    logging.warning(f"Timeout pruning {kind}")
                     # Delay longer after a timeout, which indicates that Docker is overworked
                     time.sleep(max(delay, 30))
+                    continue
                 except Exception:
                     if node:
                         # uncordon before giving up
                         uncordon(kube, node)
                     raise
+
+                toc = time.perf_counter()
+                deleted = pruned[key]
+                if deleted is None:
+                    # returns None instead of empty list when nothing to delete
+                    n_deleted = 0
                 else:
-                    deleted += 1
+                    n_deleted = len(deleted)
+                duration = toc - tic
+                bytes_deleted = pruned["SpaceReclaimed"]
+                gb = bytes_deleted / (2**30)
+                logging.info(
+                    f"Deleted {n_deleted} {kind}, freed {gb:.2f}GB in {duration:.0f} seconds."
+                )
 
             if node:
                 uncordon(kube, node)
-
-            # log what we did and how long it took
-            duration = time.perf_counter() - start
-            images_deleted = images_before - len(images)
-            logging.info(f"Deleted {images_deleted} images in {int(duration)} seconds")
 
         time.sleep(interval)
