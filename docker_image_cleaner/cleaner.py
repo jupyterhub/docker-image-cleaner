@@ -184,6 +184,8 @@ def main():
                 tic = time.perf_counter()
                 collection = getattr(client, kind)  # client.containers
                 try:
+                    # client.containers.prune: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.prune
+                    # client.images.prune: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.prune
                     pruned = collection.prune()
                 except requests.exceptions.ReadTimeout:
                     logging.warning(f"Timeout pruning {kind}")
