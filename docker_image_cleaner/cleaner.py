@@ -10,6 +10,9 @@ at this time.
 import logging
 import os
 import time
+from contextlib import contextmanager
+from contextlib import nullcontext
+from functools import partial
 
 import docker
 import requests
@@ -91,6 +94,16 @@ def uncordon(kube, node):
     )
 
 
+@contextmanager
+def cordoned(kube, node):
+    """Context manager for cordoning a node"""
+    try:
+        cordon(kube, node)
+        yield
+    finally:
+        uncordon(kube, node)
+
+
 def main():
 
     node = os.getenv("NODE_NAME")
@@ -113,6 +126,10 @@ def main():
                 f"Node {node} still cordoned, possibly leftover from earlier crash of image-cleaner"
             )
             uncordon(kube, node)
+
+        cordon_context = partial(cordoned, kube, node)
+    else:
+        cordon_context = nullcontext
 
     path_to_check = os.getenv("PATH_TO_CHECK", "/var/lib/docker")
     interval = float(os.getenv("IMAGE_GC_INTERVAL", "300"))
@@ -149,20 +166,20 @@ def main():
         logging.info(used_msg.format(used=used))
         if used < gc_high:
             # Do nothing! We have enough space
-            pass
-        else:
-            images = client.images.list(all=True)
-            if not images:
-                logging.info("No images to delete")
-                time.sleep(interval)
-                continue
-            else:
-                logging.info(f"{len(images)} images available to prune")
+            time.sleep(interval)
+            continue
 
+        images = client.images.list(all=True)
+        if not images:
+            logging.info("No images to delete")
+            time.sleep(interval)
+            continue
+        else:
+            logging.info(f"{len(images)} images available to prune")
+
+        # Ensure the node is cordoned while we prune
+        with cordon_context():
             for kind in ("containers", "images"):
-                # Ensure the node is cordoned while we prune
-                if node:
-                    cordon(kube, node)
                 key = f"{kind.title()}Deleted"
                 tic = time.perf_counter()
                 collection = getattr(client, kind)  # client.containers
@@ -173,11 +190,6 @@ def main():
                     # Delay longer after a timeout, which indicates that Docker is overworked
                     time.sleep(max(delay, 30))
                     continue
-                except Exception:
-                    if node:
-                        # uncordon before giving up
-                        uncordon(kube, node)
-                    raise
 
                 toc = time.perf_counter()
                 deleted = pruned[key]
@@ -192,8 +204,5 @@ def main():
                 logging.info(
                     f"Deleted {n_deleted} {kind}, freed {gb:.2f}GB in {duration:.0f} seconds."
                 )
-
-            if node:
-                uncordon(kube, node)
 
         time.sleep(interval)
