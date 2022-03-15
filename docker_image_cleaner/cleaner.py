@@ -138,7 +138,7 @@ def main():
     gc_low = float(os.getenv("IMAGE_GC_THRESHOLD_LOW", "60"))
     gc_high = float(os.getenv("IMAGE_GC_THRESHOLD_HIGH", "80"))
 
-    client = docker.from_env(version="auto")
+    docker_client = docker.from_env(version="auto")
 
     # with the threshold type set to relative the thresholds are interpreted
     # as a percentage of how full the partition is. In absolute mode the
@@ -169,7 +169,7 @@ def main():
             time.sleep(interval)
             continue
 
-        images = client.images.list(all=True)
+        images = docker_client.images.list(all=True)
         if not images:
             logging.info("No images to delete")
             time.sleep(interval)
@@ -182,11 +182,10 @@ def main():
             for kind in ("containers", "images"):
                 key = f"{kind.title()}Deleted"
                 tic = time.perf_counter()
-                collection = getattr(client, kind)  # client.containers
                 try:
-                    # client.containers.prune: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.prune
-                    # client.images.prune: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.prune
-                    pruned = collection.prune()
+                    # docker_client.containers.prune: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.prune
+                    # docker_client.images.prune: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.prune
+                    pruned = getattr(docker_client, kind).prune()
                 except requests.exceptions.ReadTimeout:
                     logging.warning(f"Timeout pruning {kind}")
                     # Delay longer after a timeout, which indicates that Docker is overworked
