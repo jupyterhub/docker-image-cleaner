@@ -15,7 +15,7 @@ setup(
     # PEP440:   https://www.python.org/dev/peps/pep-0440/#semantic-versioning
     # SemVer 2: https://semver.org
     #
-    version="1.0.0-alpha.2",
+    version="1.0.0-beta.1",
     python_requires=">=3.6",
     author="Project Jupyter Contributors",
     author_email="jupyter@googlegroups.com",
