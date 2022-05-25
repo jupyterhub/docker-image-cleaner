@@ -26,7 +26,7 @@ annotation_key = "hub.jupyter.org/image-cleaner-cordoned"
 
 def get_absolute_size(path):
     """
-    Directory size in bytes
+    Directory size in gigabytes
     """
     total = 0
     for dirpath, dirnames, filenames in os.walk(path):
@@ -37,7 +37,7 @@ def get_absolute_size(path):
             if os.path.isfile(f):
                 total += os.path.getsize(f)
 
-    return total
+    return total / (2**30)
 
 
 def get_used_percent(path):
@@ -151,13 +151,15 @@ def main():
         threshold_s = f"{gc_high}% inodes or blocks"
     else:
         get_used = get_absolute_size
-        used_msg = "{used // (2**30):.2f}GB used"
+        used_msg = "{used:.2f}GB used"
         threshold_s = f"{gc_high // (2**30):.0f}GB"
 
         if gc_high <= 2**30:
             raise ValueError(
                 f"Absolute GC threshold should be at least 1GB, got {gc_high}B"
             )
+        # units in GB
+        gc_high = gc_high / (2**30)
 
     logging.info(f"Pruning docker images when {path_to_check} has {threshold_s} used")
 
@@ -207,3 +209,7 @@ def main():
                 )
 
         time.sleep(interval)
+
+
+if __name__ == "__main__":
+    main()
