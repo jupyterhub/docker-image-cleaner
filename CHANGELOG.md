@@ -2,6 +2,26 @@
 
 ## 1.0
 
+### 1.0.0-beta.1 - 2022-05-25
+
+#### Enhancements made
+
+- use docker system prune to clean images [#37](https://github.com/jupyterhub/docker-image-cleaner/pull/37) ([@minrk](https://github.com/minrk), [@consideRatio](https://github.com/consideRatio), [@betatim](https://github.com/betatim))
+
+#### Maintenance and upkeep improvements
+
+- Bump kubernetes from 23.3.0 to 23.6.0 [#47](https://github.com/jupyterhub/docker-image-cleaner/pull/47) ([@dependabot](https://github.com/dependabot), [@consideRatio](https://github.com/consideRatio))
+- Bump kubernetes from 21.7.0 to 23.3.0 [#32](https://github.com/jupyterhub/docker-image-cleaner/pull/32) ([@dependabot](https://github.com/dependabot), [@minrk](https://github.com/minrk))
+- Bump kubernetes from 20.13.0 to 21.7.0 [#23](https://github.com/jupyterhub/docker-image-cleaner/pull/23) ([@dependabot](https://github.com/dependabot), [@consideRatio](https://github.com/consideRatio))
+- Bump kubernetes from 19.15.0 to 20.13.0 [#21](https://github.com/jupyterhub/docker-image-cleaner/pull/21) ([@dependabot](https://github.com/dependabot), [@consideRatio](https://github.com/consideRatio))
+- Bump kubernetes from 18.20.0 to 19.15.0 [#17](https://github.com/jupyterhub/docker-image-cleaner/pull/17) ([@dependabot](https://github.com/dependabot), [@consideRatio](https://github.com/consideRatio))
+
+#### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterhub/docker-image-cleaner/graphs/contributors?from=2021-10-10&to=2022-05-25&type=c))
+
+[@betatim](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Abetatim+updated%3A2021-10-10..2022-05-25&type=Issues) | [@consideRatio](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3AconsideRatio+updated%3A2021-10-10..2022-05-25&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Aminrk+updated%3A2021-10-10..2022-05-25&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Ayuvipanda+updated%3A2021-10-10..2022-05-25&type=Issues)
+
 ### 1.0.0-alpha.2 - 2021-10-10
 
 Initial fixes to make it function properly in jupyterhub/binderhub and jupyterhub/mybinder.org-deploy.
