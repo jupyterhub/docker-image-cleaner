@@ -15,7 +15,7 @@ setup(
     # SemVer 2: https://semver.org
     #
     version="1.0.0-beta.1",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     author="Project Jupyter Contributors",
     author_email="jupyter@googlegroups.com",
     license="BSD",
