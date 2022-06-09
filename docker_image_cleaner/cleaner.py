@@ -196,6 +196,23 @@ def main():
 
                 toc = time.perf_counter()
                 deleted = pruned[key]
+
+                if not deleted and kind == "images":
+                    # No dangling images to delete, still space to free.
+                    logging.info("No dangling images to prune, pruning _all_ images")
+                    tic = time.perf_counter()
+                    try:
+                        # prune again, this time with `dangling=False` filter,
+                        # which deletes _all_ images instead of just dangling ones
+                        pruned = docker_client.images.prune(filters={"dangling": False})
+                    except requests.exceptions.ReadTimeout:
+                        logging.warning("Timeout pruning all images")
+                        # Delay longer after a timeout, which indicates that Docker is overworked
+                        time.sleep(max(delay, 30))
+                        continue
+                    toc = time.perf_counter()
+                    deleted = pruned[key]
+
                 if deleted is None:
                     # returns None instead of empty list when nothing to delete
                     n_deleted = 0
