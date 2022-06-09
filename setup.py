@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 with open(Path(__file__).parent / "requirements.in") as f:
     requirements = [l.strip() for l in f.readlines() if not l.strip().startswith("#")]

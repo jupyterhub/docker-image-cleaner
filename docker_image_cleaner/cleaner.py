@@ -10,13 +10,11 @@ at this time.
 import logging
 import os
 import time
-from contextlib import contextmanager
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from functools import partial
 
 import docker
 import requests
-
 
 logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 
@@ -108,8 +106,8 @@ def main():
 
     node = os.getenv("NODE_NAME")
     if node:
-        import kubernetes.config
         import kubernetes.client
+        import kubernetes.config
 
         try:
             kubernetes.config.load_incluster_config()
