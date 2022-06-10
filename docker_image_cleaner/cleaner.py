@@ -104,7 +104,7 @@ def cordoned(kube, node):
 
 def main():
 
-    node = os.getenv("DOCKER_IMAGE_CLEANER__NODE_NAME")
+    node = os.getenv("DOCKER_IMAGE_CLEANER_NODE_NAME")
     if node:
         import kubernetes.client
         import kubernetes.config
@@ -129,12 +129,12 @@ def main():
     else:
         cordon_context = nullcontext
 
-    path_to_check = os.getenv("DOCKER_IMAGE_CLEANER__PATH_TO_CHECK", "/var/lib/docker")
-    interval_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER__INTERVAL_SECONDS", "300"))
-    delay_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER__DELAY_SECONDS", "1"))
-    threshold_type = os.getenv("DOCKER_IMAGE_CLEANER__THRESHOLD_TYPE", "relative")
-    threshold_low = float(os.getenv("DOCKER_IMAGE_CLEANER__THRESHOLD_LOW", "60"))
-    threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER__THRESHOLD_HIGH", "80"))
+    path_to_check = os.getenv("DOCKER_IMAGE_CLEANER_PATH_TO_CHECK", "/var/lib/docker")
+    interval_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS", "300"))
+    delay_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER_DELAY_SECONDS", "1"))
+    threshold_type = os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE", "relative")
+    threshold_low = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_LOW", "60"))
+    threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH", "80"))
 
     docker_client = docker.from_env(version="auto")
 
