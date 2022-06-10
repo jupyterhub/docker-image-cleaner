@@ -104,7 +104,7 @@ def cordoned(kube, node):
 
 def main():
 
-    node = os.getenv("NODE_NAME")
+    node = os.getenv("DOCKER_IMAGE_CLEANER_NODE_NAME")
     if node:
         import kubernetes.client
         import kubernetes.config
@@ -129,12 +129,12 @@ def main():
     else:
         cordon_context = nullcontext
 
-    path_to_check = os.getenv("PATH_TO_CHECK", "/var/lib/docker")
-    interval = float(os.getenv("IMAGE_GC_INTERVAL", "300"))
-    delay = float(os.getenv("IMAGE_GC_DELAY", "1"))
-    gc_threshold_type = os.getenv("IMAGE_GC_THRESHOLD_TYPE", "relative")
-    gc_low = float(os.getenv("IMAGE_GC_THRESHOLD_LOW", "60"))
-    gc_high = float(os.getenv("IMAGE_GC_THRESHOLD_HIGH", "80"))
+    path_to_check = os.getenv("DOCKER_IMAGE_CLEANER_PATH_TO_CHECK", "/var/lib/docker")
+    interval_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS", "300"))
+    delay_seconds = float(os.getenv("DOCKER_IMAGE_CLEANER_DELAY_SECONDS", "1"))
+    threshold_type = os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE", "relative")
+    threshold_low = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_LOW", "60"))
+    threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH", "80"))
 
     docker_client = docker.from_env(version="auto")
 
@@ -143,36 +143,36 @@ def main():
     # thresholds are interpreted as size in bytes. By default you should use
     # "relative" mode. Use "absolute" mode when you are using DIND and your
     # nodes only have one partition.
-    if gc_threshold_type == "relative":
+    if threshold_type == "relative":
         get_used = get_used_percent
         used_msg = "{used:.1f}% used"
-        threshold_s = f"{gc_high}% inodes or blocks"
+        threshold_s = f"{threshold_high}% inodes or blocks"
     else:
         get_used = get_absolute_size
         used_msg = "{used:.2f}GB used"
-        threshold_s = f"{gc_high // (2**30):.0f}GB"
+        threshold_s = f"{threshold_high // (2**30):.0f}GB"
 
-        if gc_high <= 2**30:
+        if threshold_high <= 2**30:
             raise ValueError(
-                f"Absolute GC threshold should be at least 1GB, got {gc_high}B"
+                f"Absolute GC threshold should be at least 1GB, got {threshold_high}B"
             )
         # units in GB
-        gc_high = gc_high / (2**30)
+        threshold_high = threshold_high / (2**30)
 
     logging.info(f"Pruning docker images when {path_to_check} has {threshold_s} used")
 
     while True:
         used = get_used(path_to_check)
         logging.info(used_msg.format(used=used))
-        if used < gc_high:
+        if used < threshold_high:
             # Do nothing! We have enough space
-            time.sleep(interval)
+            time.sleep(interval_seconds)
             continue
 
         images = docker_client.images.list(all=True)
         if not images:
             logging.info("No images to delete")
-            time.sleep(interval)
+            time.sleep(interval_seconds)
             continue
         else:
             logging.info(f"{len(images)} images available to prune")
@@ -189,7 +189,7 @@ def main():
                 except requests.exceptions.ReadTimeout:
                     logging.warning(f"Timeout pruning {kind}")
                     # Delay longer after a timeout, which indicates that Docker is overworked
-                    time.sleep(max(delay, 30))
+                    time.sleep(max(delay_seconds, 30))
                     continue
 
                 toc = time.perf_counter()
@@ -206,7 +206,7 @@ def main():
                     except requests.exceptions.ReadTimeout:
                         logging.warning("Timeout pruning all images")
                         # Delay longer after a timeout, which indicates that Docker is overworked
-                        time.sleep(max(delay, 30))
+                        time.sleep(max(delay_seconds, 30))
                         continue
                     toc = time.perf_counter()
                     deleted = pruned[key]
@@ -223,7 +223,7 @@ def main():
                     f"Deleted {n_deleted} {kind}, freed {gb:.2f}GB in {duration:.0f} seconds."
                 )
 
-        time.sleep(interval)
+        time.sleep(interval_seconds)
 
 
 if __name__ == "__main__":

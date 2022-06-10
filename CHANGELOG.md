@@ -2,6 +2,23 @@
 
 ## 1.0
 
+### 1.0.0-beta.2 - Not yet released
+
+#### Breaking changes
+
+All environment variables configuring the docker-image-cleaner has been renamed
+but have the same functionality.
+
+| Before                    | After                                   |
+| ------------------------- | --------------------------------------- |
+| `NODE_NAME`               | `DOCKER_IMAGE_CLEANER_NODE_NAME`        |
+| `PATH_TO_CHECK`           | `DOCKER_IMAGE_CLEANER_PATH_TO_CHECK`    |
+| `IMAGE_GC_INTERVAL`       | `DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS` |
+| `IMAGE_GC_DELAY`          | `DOCKER_IMAGE_CLEANER_DELAY_SECONDS`    |
+| `IMAGE_GC_THRESHOLD_TYPE` | `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`   |
+| `IMAGE_GC_THRESHOLD_HIGH` | `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   |
+| `IMAGE_GC_THRESHOLD_LOW`  | `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`    |
+
 ### 1.0.0-beta.1 - 2022-05-25
 
 #### Enhancements made
