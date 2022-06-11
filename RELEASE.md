@@ -23,9 +23,8 @@ For you to follow along according to these instructions, you need:
    git clean -xfd
    ```
 
-1. Update [CHANGELOG.md](CHANGELOG.md). Doing this can be made easier with the
-   help of the
-   [choldgraf/github-activity](https://github.com/choldgraf/github-activity)
+1. Update [CHANGELOG.md](CHANGELOG.md) with the help of the
+   [github-activity](https://github-activity.readthedocs.io)
    utility.
 
 1. Set the `version` variable in [setup.py](setup.py) appropriately and make a
