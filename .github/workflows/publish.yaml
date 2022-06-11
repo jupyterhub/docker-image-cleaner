@@ -5,8 +5,23 @@ name: Publish
 
 # Always build releases/images but only publish to PyPI/quay.io on pushed tags
 on:
-  push:
   pull_request:
+    paths:
+      - "Dockerfile"
+      - "requirements.in"
+      - "requirements.txt"
+      - ".github/workflows/refreeze-dockerfile-requirements-txt.yaml"
+  push:
+    paths:
+      - "Dockerfile"
+      - "requirements.in"
+      - "requirements.txt"
+      - ".github/workflows/refreeze-dockerfile-requirements-txt.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+      - "update-*"
+    tags: ["**"]
   workflow_dispatch:
 
 jobs:

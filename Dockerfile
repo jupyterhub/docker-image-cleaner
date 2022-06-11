@@ -1,3 +1,6 @@
+# NOTE: Updates to this image tag should go hand in hand with updates in the
+#       refreeze-dockerfile-requirements-txt.yaml workflow.
+#
 FROM python:3.9-alpine
 
 # Ensures written logs are made available directly
@@ -13,7 +16,10 @@ RUN ARCH=$(uname -m); \
  && chmod +x /tini
 
 # Install docker-image-cleaner
-COPY . /tmp/cleaner
-RUN pip install --no-cache /tmp/cleaner
+COPY . /opt/docker-image-cleaner
+WORKDIR /opt/docker-image-cleaner
+RUN pip install --no-cache-dir \
+        -r requirements.txt \
+        .
 
 ENTRYPOINT [ "/tini", "--", "docker-image-cleaner" ]
