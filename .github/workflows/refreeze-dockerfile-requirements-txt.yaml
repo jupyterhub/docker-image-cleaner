@@ -10,7 +10,6 @@ on:
       - "**/requirements.txt"
       - ".github/workflows/refreeze-dockerfile-requirements-txt.yaml"
     branches: ["main"]
-    tags: ["**"]
   workflow_dispatch:
 
 jobs:
