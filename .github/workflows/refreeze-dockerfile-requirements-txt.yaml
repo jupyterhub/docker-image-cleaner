@@ -21,17 +21,17 @@ jobs:
     if: github.repository == 'jupyterhub/docker-image-cleaner'
     runs-on: ubuntu-latest
 
+    # environment and permissions for the secrets.jupyterhub_bot_pat token was
+    # setup according to steps in:
+    # https://github.com/jupyterhub/team-compass/issues/516#issuecomment-1129961954
+    #
     environment: refreeze-dockerfile-requirements-txt
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.9"
 
       - name: Refreeze Dockerfile's requirements.txt based on requirements.in
         run: |
-          cd ${{ matrix.image }}
           docker run --rm \
               --env=CUSTOM_COMPILE_COMMAND='Use "Run workflow" button at https://github.com/jupyterhub/docker-image-cleaner/actions/workflows/refreeze-dockerfile-requirements-txt.yaml' \
               --volume=$PWD:/io \
