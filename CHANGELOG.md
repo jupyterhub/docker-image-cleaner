@@ -21,24 +21,24 @@ but have the same functionality.
 | `IMAGE_GC_THRESHOLD_HIGH` | `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   |
 | `IMAGE_GC_THRESHOLD_LOW`  | `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`    |
 
-## Bugs fixed
+#### Bugs fixed
 
 - prune all images if no dangling images left [#51](https://github.com/jupyterhub/docker-image-cleaner/pull/51) ([@minrk](https://github.com/minrk))
 
-## Maintenance and upkeep improvements
+#### Maintenance and upkeep improvements
 
 - breaking, maint: prefix env vars with project name [#55](https://github.com/jupyterhub/docker-image-cleaner/pull/55) ([@consideRatio](https://github.com/consideRatio))
 - pre-commit: use isort over reorder-python-imports [#53](https://github.com/jupyterhub/docker-image-cleaner/pull/53) ([@consideRatio](https://github.com/consideRatio))
 - Bump actions/setup-python from 3 to 4 [#50](https://github.com/jupyterhub/docker-image-cleaner/pull/50) ([@dependabot](https://github.com/dependabot))
 
-## Other merged PRs
+#### Other merged PRs
 
 - Refreeze Dockerfile's requirements.txt [#58](https://github.com/jupyterhub/docker-image-cleaner/pull/58) ([@jupyterhub-bot](https://github.com/jupyterhub-bot))
 - ci: fix detail in refreeze requirements.txt workflow [#57](https://github.com/jupyterhub/docker-image-cleaner/pull/57) ([@consideRatio](https://github.com/consideRatio))
 - image: use frozen requirements.txt and automate updates of it [#56](https://github.com/jupyterhub/docker-image-cleaner/pull/56) ([@consideRatio](https://github.com/consideRatio))
 - breaking, maint: require py38+ [#54](https://github.com/jupyterhub/docker-image-cleaner/pull/54) ([@consideRatio](https://github.com/consideRatio))
 
-## Contributors to this release
+#### Contributors to this release
 
 ([GitHub contributors page for this release](https://github.com/jupyterhub/docker-image-cleaner/graphs/contributors?from=2022-05-25&to=2022-06-11&type=c))
 
