@@ -2,7 +2,9 @@
 
 ## 1.0
 
-### 1.0.0-beta.2 - Not yet released
+### 1.0.0-beta.2 - 2022-06-11
+
+([full changelog](https://github.com/jupyterhub/docker-image-cleaner/compare/1.0.0-beta.1...1.0.0-beta.2))
 
 #### Breaking changes
 
@@ -18,6 +20,29 @@ but have the same functionality.
 | `IMAGE_GC_THRESHOLD_TYPE` | `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`   |
 | `IMAGE_GC_THRESHOLD_HIGH` | `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   |
 | `IMAGE_GC_THRESHOLD_LOW`  | `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`    |
+
+#### Bugs fixed
+
+- prune all images if no dangling images left [#51](https://github.com/jupyterhub/docker-image-cleaner/pull/51) ([@minrk](https://github.com/minrk))
+
+#### Maintenance and upkeep improvements
+
+- breaking, maint: prefix env vars with project name [#55](https://github.com/jupyterhub/docker-image-cleaner/pull/55) ([@consideRatio](https://github.com/consideRatio))
+- pre-commit: use isort over reorder-python-imports [#53](https://github.com/jupyterhub/docker-image-cleaner/pull/53) ([@consideRatio](https://github.com/consideRatio))
+- Bump actions/setup-python from 3 to 4 [#50](https://github.com/jupyterhub/docker-image-cleaner/pull/50) ([@dependabot](https://github.com/dependabot))
+
+#### Other merged PRs
+
+- Refreeze Dockerfile's requirements.txt [#58](https://github.com/jupyterhub/docker-image-cleaner/pull/58) ([@jupyterhub-bot](https://github.com/jupyterhub-bot))
+- ci: fix detail in refreeze requirements.txt workflow [#57](https://github.com/jupyterhub/docker-image-cleaner/pull/57) ([@consideRatio](https://github.com/consideRatio))
+- image: use frozen requirements.txt and automate updates of it [#56](https://github.com/jupyterhub/docker-image-cleaner/pull/56) ([@consideRatio](https://github.com/consideRatio))
+- breaking, maint: require py38+ [#54](https://github.com/jupyterhub/docker-image-cleaner/pull/54) ([@consideRatio](https://github.com/consideRatio))
+
+#### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterhub/docker-image-cleaner/graphs/contributors?from=2022-05-25&to=2022-06-11&type=c))
+
+[@consideRatio](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3AconsideRatio+updated%3A2022-05-25..2022-06-11&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Adependabot+updated%3A2022-05-25..2022-06-11&type=Issues) | [@jupyterhub-bot](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Ajupyterhub-bot+updated%3A2022-05-25..2022-06-11&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Aminrk+updated%3A2022-05-25..2022-06-11&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Awelcome+updated%3A2022-05-25..2022-06-11&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterhub%2Fdocker-image-cleaner+involves%3Ayuvipanda+updated%3A2022-05-25..2022-06-11&type=Issues)
 
 ### 1.0.0-beta.1 - 2022-05-25
 
