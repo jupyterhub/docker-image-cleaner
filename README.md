@@ -71,4 +71,4 @@ Currently, environment variables are used to set configuration for now.
 | `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`   | Determine if GC should be triggered based on relative or absolute disk usage                                                   | `relative`        |
 | `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   | % or absolute disk space available (based on `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`) when we start deleting container images    | `80`              |
 | `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`    | % or absolute disk space available (based on `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`) when we can stop deleting container images | `60`              |
-| `DOCKER_IMAGE_CLEANER_TIMEOUT`          | Request timeout (in seconds) for docker API requests. Pruning images often takes minutes. Default: 300 (5 minutes)             |
+| `DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS`  | Request timeout (in seconds) for docker API requests. Pruning images often takes minutes. Default: 300 (5 minutes)             |
