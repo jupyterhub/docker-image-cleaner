@@ -135,8 +135,9 @@ def main():
     threshold_type = os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE", "relative")
     threshold_low = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_LOW", "60"))
     threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH", "80"))
+    timeout_seconds = int(os.getenv("DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS", "300"))
 
-    docker_client = docker.from_env(version="auto")
+    docker_client = docker.from_env(version="auto", timeout=timeout_seconds)
 
     # with the threshold type set to relative the thresholds are interpreted
     # as a percentage of how full the partition is. In absolute mode the
