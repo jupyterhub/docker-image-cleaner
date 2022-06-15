@@ -49,26 +49,23 @@ garbage collection in a configurable way.
 3. If garbage collection is triggered, the kubernetes node is first cordoned
    to prevent any new pods from being scheduled on it for the duration of the
    garbage collection.
-4. Unused container images are deleted one by one, starting with the biggest,
-   until the disk space used by `/var/lib/docker` falls below the garbage collection
-   'ok' threshold (specified by `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`). This low / high system
-   makes sure we don't get too aggressive in cleaning the disk, as images being
-   present on the node does speed up binderhub launches.
-5. After the garbage collection is done, the kubernetes node is also uncordoned.
-6. When done, we wait another 5 minutes (set by `DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS`), and repeat
+4. Stopped containers are removed via `docker container prune`.
+5. Dangling images are removed via `docker image prune`
+6. If no dangling images are found to prune, _all_ images are pruned (`docker image prune -a`)
+7. After the garbage collection is done, the kubernetes node is also uncordoned.
+8. When done, we wait another 5 minutes (set by `DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS`), and repeat
    the whole process.
 
 ## Configuration options
 
 Currently, environment variables are used to set configuration for now.
 
-| Env variable                            | Description                                                                                                                    | Default           |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `DOCKER_IMAGE_CLEANER_NODE_NAME`        | The k8s node where the docker image cleaner is running, so it can be cordoned via the k8s api                                  |                   |
-| `DOCKER_IMAGE_CLEANER_PATH_TO_CHECK`    | Path to `/var/lib/docker` directory used by the docker daemon                                                                  | `/var/lib/docker` |
-| `DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS` | Amount of time (in seconds) to wait between checking if GC needs to be triggered                                               | `300`             |
-| `DOCKER_IMAGE_CLEANER_DELAY_SECONDS`    | Amount of time (in seconds) to wait between deleting container images, so we don't DOS the docker API                          | `1`               |
-| `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`   | Determine if GC should be triggered based on relative or absolute disk usage                                                   | `relative`        |
-| `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   | % or absolute disk space available (based on `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`) when we start deleting container images    | `80`              |
-| `DOCKER_IMAGE_CLEANER_THRESHOLD_LOW`    | % or absolute disk space available (based on `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`) when we can stop deleting container images | `60`              |
-| `DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS`  | Request timeout (in seconds) for docker API requests. Pruning images often takes minutes. Default: 300 (5 minutes)             |
+| Env variable                            | Description                                                                                                                 | Default           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `DOCKER_IMAGE_CLEANER_NODE_NAME`        | The k8s node where the docker image cleaner is running, so it can be cordoned via the k8s api                               |                   |
+| `DOCKER_IMAGE_CLEANER_PATH_TO_CHECK`    | Path to `/var/lib/docker` directory used by the docker daemon                                                               | `/var/lib/docker` |
+| `DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS` | Amount of time (in seconds) to wait between checking if GC needs to be triggered                                            | `300`             |
+| `DOCKER_IMAGE_CLEANER_DELAY_SECONDS`    | Amount of time (in seconds) to wait between deleting container images, so we don't DOS the docker API                       | `1`               |
+| `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`   | Determine if GC should be triggered based on relative or absolute disk usage                                                | `relative`        |
+| `DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH`   | % or absolute disk space available (based on `DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE`) when we start deleting container images | `80`              |
+| `DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS`  | Request timeout (in seconds) for docker API requests. Pruning images often takes minutes. Default: 300 (5 minutes)          |
