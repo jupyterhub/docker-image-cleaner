@@ -8,6 +8,8 @@
 # - Run on all files:   pre-commit run --all-files
 # - Register git hooks: pre-commit install --install-hooks
 #
+ci:
+  autoupdate_interval: monthly
 repos:
   # Autoformat: Python code, syntax patterns are modernized
   - repo: https://github.com/asottile/pyupgrade
@@ -18,30 +20,33 @@ repos:
           - --py38-plus
 
   # Autoformat: Python code
-  - repo: https://github.com/psf/black
-    rev: 22.12.0
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.0.0
     hooks:
-      - id: black
+      - id: autoflake
+        # args ref: https://github.com/PyCQA/autoflake#advanced-usage
         args:
-          - --target-version=py38
-          - --target-version=py39
-          - --target-version=py310
+          - --in-place
 
   # Autoformat: Python code
   - repo: https://github.com/pycqa/isort
     rev: 5.11.1
     hooks:
       - id: isort
-        args:
-          - --profile=black
 
-  # Autoformat: markdown, yaml, json
+  # Autoformat: Python code
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+
+  # Autoformat: markdown, yaml, javascript (see the file .prettierignore)
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.0-alpha.4
     hooks:
       - id: prettier
 
-  # Misc autoformatting and linting
+  # Autoformat and linting, misc. details
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -49,3 +54,9 @@ repos:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: requirements-txt-fixer
+
+  # Linting: Python code (see the file .flake8)
+  - repo: https://github.com/PyCQA/flake8
+    rev: "6.0.0"
+    hooks:
+      - id: flake8
