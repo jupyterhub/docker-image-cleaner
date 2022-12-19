@@ -135,6 +135,7 @@ def main():
     threshold_type = os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE", "relative")
     threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH", "80"))
     timeout_seconds = int(os.getenv("DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS", "300"))
+    min_dangling_gb = float(os.getenv("DOCKER_IMAGE_CLEANER_MIN_DANGLING_GB", "1"))
 
     docker_client = docker.from_env(version="auto", timeout=timeout_seconds)
 
@@ -194,10 +195,24 @@ def main():
 
                 toc = time.perf_counter()
                 deleted = pruned[key]
+                # pruned looks like:
+                # {
+                #     "ImagesDeleted": [
+                #         {"Deleted": "sha256:5611ea8655"},
+                #     ],
+                #     "SpaceReclaimed": 4563228463,
+                # }
 
-                if not deleted and kind == "images":
-                    # No dangling images to delete, still space to free.
-                    logging.info("No dangling images to prune, pruning _all_ images")
+                # first prune only removed dangling images
+                # check if it deleted 'enough' to continue pruning all images
+                deleted_bytes = pruned["SpaceReclaimed"]
+                deleted_gb = deleted_bytes / (2**30)
+
+                if kind == "images" and deleted_gb < min_dangling_gb:
+                    # Deleting dangling images didn't free enough
+                    logging.info(
+                        f"Pruning dangling images freed only {deleted_gb:.2f}GB, pruning _all_ images"
+                    )
                     tic = time.perf_counter()
                     try:
                         # prune again, this time with `dangling=False` filter,
@@ -210,6 +225,9 @@ def main():
                         continue
                     toc = time.perf_counter()
                     deleted = pruned[key]
+                    # recalculate deleted gb
+                    deleted_bytes += pruned["SpaceReclaimed"]
+                    deleted_gb = deleted_bytes / (2**30)
 
                 if deleted is None:
                     # returns None instead of empty list when nothing to delete
@@ -217,10 +235,8 @@ def main():
                 else:
                     n_deleted = len(deleted)
                 duration = toc - tic
-                bytes_deleted = pruned["SpaceReclaimed"]
-                gb = bytes_deleted / (2**30)
                 logging.info(
-                    f"Deleted {n_deleted} {kind}, freed {gb:.2f}GB in {duration:.0f} seconds."
+                    f"Deleted {n_deleted} {kind}, freed {deleted_gb:.2f}GB in {duration:.0f} seconds."
                 )
 
         time.sleep(interval_seconds)
