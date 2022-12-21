@@ -21,6 +21,8 @@ logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 
 annotation_key = "hub.jupyter.org/image-cleaner-cordoned"
 
+GB = 2**30
+
 
 def get_absolute_size(path):
     """
@@ -35,7 +37,7 @@ def get_absolute_size(path):
             if os.path.isfile(f):
                 total += os.path.getsize(f)
 
-    return total / (2**30)
+    return total / GB
 
 
 def get_used_percent(path):
@@ -147,17 +149,20 @@ def main():
         get_used = get_used_percent
         used_msg = "{used:.1f}% used"
         threshold_s = f"{threshold_high}% inodes or blocks"
-    else:
+    elif threshold_type == "absolute":
         get_used = get_absolute_size
         used_msg = "{used:.2f}GB used"
-        threshold_s = f"{threshold_high // (2**30):.0f}GB"
-
+        threshold_s = f"{threshold_high // GB:.0f}GB"
         if threshold_high <= 2**30:
             raise ValueError(
                 f"Absolute GC threshold should be at least 1GB, got {threshold_high}B"
             )
         # units in GB
-        threshold_high = threshold_high / (2**30)
+        threshold_high = threshold_high / GB
+    else:
+        raise ValueError(
+            f"DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE must be 'relative' or 'absolute', got '{threshold_type}'"
+        )
 
     logging.info(f"Pruning docker images when {path_to_check} has {threshold_s} used")
 
@@ -192,13 +197,52 @@ def main():
                     time.sleep(max(delay_seconds, 30))
                     continue
 
-                toc = time.perf_counter()
                 deleted = pruned[key]
+                # pruned looks like:
+                # {
+                #     "ImagesDeleted": [
+                #         {"Deleted": "sha256:5611ea8655"},
+                #     ],
+                #     "SpaceReclaimed": 4563228463,
+                # }
 
-                if not deleted and kind == "images":
-                    # No dangling images to delete, still space to free.
-                    logging.info("No dangling images to prune, pruning _all_ images")
-                    tic = time.perf_counter()
+                deleted_bytes = pruned["SpaceReclaimed"]
+                deleted_gb = deleted_bytes / GB
+                if deleted is None:
+                    # returns None instead of empty list when nothing to delete
+                    n_deleted = 0
+                else:
+                    n_deleted = len(deleted)
+
+                # first prune only removes dangling images
+                # check if it deleted enough, or if we should continue pruning all images
+                prune_all_images = False
+                if kind == "images":
+                    if not deleted:
+                        # found no dangling images to prune,
+                        # no need to check space again
+                        prune_all_images = True
+                    else:
+                        # check used again after pruning dangling images
+                        # if dangling images didn't cross the threshold,
+                        # delete all images
+                        logging.info(
+                            "Checking if pruning dangling images freed enough space"
+                        )
+                        if threshold_type == "absolute":
+                            # we can estimate change in absolute usage without calling get_used
+                            # absolute get_used is very expensive
+                            used -= deleted_gb
+                        else:
+                            # inode-based get_used is very cheap to recalculate
+                            used = get_used(path_to_check)
+                        prune_all_images = used > threshold_high
+
+                if kind == "images" and prune_all_images:
+                    # Deleting dangling images didn't free enough
+                    logging.info(
+                        f"Pruning {n_deleted} dangling images freed only {deleted_gb:.2f}GB, pruning _all_ images"
+                    )
                     try:
                         # prune again, this time with `dangling=False` filter,
                         # which deletes _all_ images instead of just dangling ones
@@ -208,19 +252,17 @@ def main():
                         # Delay longer after a timeout, which indicates that Docker is overworked
                         time.sleep(max(delay_seconds, 30))
                         continue
-                    toc = time.perf_counter()
                     deleted = pruned[key]
+                    if deleted:
+                        n_deleted += len(deleted)
+                    # recalculate deleted gb
+                    deleted_bytes += pruned["SpaceReclaimed"]
+                    deleted_gb = deleted_bytes / GB
 
-                if deleted is None:
-                    # returns None instead of empty list when nothing to delete
-                    n_deleted = 0
-                else:
-                    n_deleted = len(deleted)
+                toc = time.perf_counter()
                 duration = toc - tic
-                bytes_deleted = pruned["SpaceReclaimed"]
-                gb = bytes_deleted / (2**30)
                 logging.info(
-                    f"Deleted {n_deleted} {kind}, freed {gb:.2f}GB in {duration:.0f} seconds."
+                    f"Deleted {n_deleted} {kind}, freed {deleted_gb:.2f}GB in {duration:.0f} seconds."
                 )
 
         time.sleep(interval_seconds)
