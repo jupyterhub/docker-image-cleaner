@@ -105,7 +105,6 @@ def cordoned(kube, node):
 
 
 def main():
-
     node = os.getenv("DOCKER_IMAGE_CLEANER_NODE_NAME")
     if node:
         import kubernetes.client
