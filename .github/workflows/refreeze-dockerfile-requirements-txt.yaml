@@ -10,6 +10,9 @@ on:
       - "**/requirements.txt"
       - ".github/workflows/refreeze-dockerfile-requirements-txt.yaml"
     branches: ["main"]
+  schedule:
+    # Run 05:00 the first day of the month ref: https://crontab.guru/#0_5_1_*_*
+    - cron: "0 5 1 * *"
   workflow_dispatch:
 
 jobs:
