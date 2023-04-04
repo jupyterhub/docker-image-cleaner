@@ -1,22 +1,17 @@
-# dependabot.yml reference: https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/configuration-options-for-dependency-updates
+# dependabot.yaml reference: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 #
 # Notes:
 # - Status and logs from dependabot are provided at
 #   https://github.com/jupyterhub/docker-image-cleaner/network/updates.
 # - YAML anchors are not supported here or in GitHub Workflows.
-# - We explicitly set the "maintenance" label to help our changelog generator
-#   tool github-activity to categorize PRs.
 #
-
 version: 2
 updates:
   # Maintain dependencies in our GitHub Workflows
-  - package-ecosystem: "github-actions"
-    directory: "/" # This should be / rather than .github/workflows
+  - package-ecosystem: github-actions
+    directory: /
+    labels: [ci]
     schedule:
       interval: monthly
       time: "05:00"
-      timezone: "Etc/UTC"
-    labels:
-      - maintenance
-      - dependencies
+      timezone: Etc/UTC
