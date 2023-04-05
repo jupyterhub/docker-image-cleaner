@@ -10,24 +10,11 @@
 
 version: 2
 updates:
-  # Maintain Python dependencies for the quay.io/jupyterhub/docker-image-cleaner
-  # image
-  - package-ecosystem: pip
-    directory: "/"
-    schedule:
-      interval: daily
-      time: "00:00"
-      timezone: "Etc/UTC"
-    versioning-strategy: lockfile-only
-    labels:
-      - maintenance
-      - dependencies
-
   # Maintain dependencies in our GitHub Workflows
   - package-ecosystem: "github-actions"
     directory: "/" # This should be / rather than .github/workflows
     schedule:
-      interval: daily
+      interval: monthly
       time: "05:00"
       timezone: "Etc/UTC"
     labels:
