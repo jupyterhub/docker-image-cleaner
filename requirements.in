@@ -1,5 +1,8 @@
-# This file is automatically maintained by Dependabot, as configured in
-# .github/dependabot.yaml.
+# These are dependencies for the Python package, which are frozen into
+# requirements.txt for use by the Dockerfile using a GitHub Workflow that can be
+# manually triggered from
+# https://github.com/jupyterhub/docker-image-cleaner/actions/workflows/refreeze-dockerfile-requirements-txt.yaml.
 #
 docker
 kubernetes
+requests
