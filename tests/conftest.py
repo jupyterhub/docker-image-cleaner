@@ -71,6 +71,7 @@ def dind(tmpdir, host_docker, dind_image, dind_dir):
         detach=True,
         ports={"2376/tcp": ("127.0.0.1", None)},
     )
+
     # start streaming logs from the container
     def stream_logs():
         for line in dind_container.logs(stream=True):
