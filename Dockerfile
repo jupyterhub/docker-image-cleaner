@@ -1,7 +1,7 @@
 # NOTE: Updates to this image tag should go hand in hand with updates in the
 #       refreeze-dockerfile-requirements-txt.yaml workflow.
 #
-FROM python:3.9-alpine
+FROM python:3.11-alpine
 
 # Ensures written logs are made available directly
 ENV PYTHONUNBUFFERED=1

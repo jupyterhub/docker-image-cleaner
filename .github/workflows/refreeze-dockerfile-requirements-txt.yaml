@@ -39,7 +39,7 @@ jobs:
               --volume=$PWD:/io \
               --workdir=/io \
               --user=root \
-              python:3.9-alpine \
+              python:3.11-alpine \
               sh -c 'pip install pip-tools==6.* && pip-compile --upgrade'
 
       - name: git diff
