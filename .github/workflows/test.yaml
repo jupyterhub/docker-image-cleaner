@@ -26,8 +26,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # We run tests against various versions of the docker api provided by
+          # dockerd, itself running inside a docker container on the host
+          # system.
+          #
+          # ref: https://hub.docker.com/_/docker/tags?page=1&name=dind
+          #
           - python-version: "3.8"
+            docker-api-providing-image: docker:20-dind
+          - python-version: "3.9"
+            docker-api-providing-image: docker:23-dind
+          - python-version: "3.10"
+            docker-api-providing-image: docker:24-dind
           - python-version: "3.11"
+            docker-api-providing-image: docker:dind
 
     steps:
       - uses: actions/checkout@v3
@@ -45,14 +57,12 @@ jobs:
           pip freeze
 
       - name: Run pytest
-        # if pytest is run without sudo, it won't have permissions to inspect
-        # /var/lib/docker and can't decide on when to clean etc either.
-        #
-        # FIXME: docker image cleaner should realize it doesn't have permissions
-        #        to estimate the disk usage in get_absolute_size
+        # pytest is run with sudo, as it seems to need it for permissions to
+        # inspect /var/lib/docker and cleanup built images after tests complete
+        # without erroring.
         #
         run: |
-          sudo -E PATH=$PATH bash -c "pytest --maxfail=2 --cov=docker_image_cleaner"
+          sudo -E PATH=$PATH bash -c "pytest --docker-api-providing-image=${{ matrix.docker-api-providing-image }} --cov=docker_image_cleaner"
 
       # GitHub action reference: https://github.com/codecov/codecov-action
       - uses: codecov/codecov-action@v3

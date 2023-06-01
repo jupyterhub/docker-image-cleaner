@@ -13,6 +13,28 @@ logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 dind_container_name = "test-image-cleaner-dind"
 
 
+def pytest_addoption(parser, pluginmanager):
+    """
+    A pytest hook to register argparse-style options and ini-style config
+    values.
+
+    We use it to declare command-line arguments.
+
+    ref: https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_addoption
+    ref: https://docs.pytest.org/en/stable/reference/reference.html#pytest.Parser.addoption
+    """
+    parser.addoption(
+        "--docker-api-providing-image",
+        default="docker:dind",
+        help=(
+            "We run tests against various versions of the docker api provided "
+            "by dockerd itself running inside a docker container on the host "
+            "system. Tests rely on a docker api provided by a daemon running "
+            "inside a container started using this image."
+        ),
+    )
+
+
 @pytest.fixture(scope="session")
 def host_docker():
     d = docker.from_env()
@@ -36,8 +58,8 @@ def host_docker():
 
 
 @pytest.fixture(scope="session")
-def dind_image(host_docker):
-    dind_image = "docker:24-dind"
+def dind_image(host_docker, pytestconfig):
+    dind_image = pytestconfig.getoption("--docker-api-providing-image")
     host_docker.images.pull(dind_image)
     return dind_image
 
