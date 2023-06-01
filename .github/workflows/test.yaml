@@ -3,13 +3,11 @@ name: Test
 on:
   pull_request:
     paths-ignore:
-      - "docs/**"
       - "**.md"
       - ".github/workflows/*"
       - "!.github/workflows/test.yaml"
   push:
     paths-ignore:
-      - "docs/**"
       - "**.md"
       - ".github/workflows/*"
       - "!.github/workflows/test.yaml"
@@ -20,33 +18,22 @@ on:
       - "**"
   workflow_dispatch:
 
-env:
-  # UTF-8 content may be interpreted as ascii and causes errors without this.
-  LANG: C.UTF-8
-  PYTEST_ADDOPTS: "--verbose --color=yes"
-
-permissions:
-  contents: read
-
 jobs:
   test:
-    runs-on: ubuntu-20.04
-    timeout-minutes: 15
+    runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: false
       matrix:
-        python:
-          - "3.10"
+        include:
+          - python-version: "3.8"
+          - python-version: "3.11"
 
     steps:
       - uses: actions/checkout@v3
-
-      # NOTE: actions/setup-python@v4 make use of a cache within the GitHub base
-      #       environment and setup in a fraction of a second.
-      - name: Install Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: "${{ matrix.python }}"
+          python-version: "${{ matrix.python-version }}"
 
       - name: Install Python dependencies
         run: |
@@ -59,6 +46,7 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest --maxfail=2 --cov=docker_image_cleaner tests
+          pytest --maxfail=2 --cov=docker_image_cleaner
 
+      # GitHub action reference: https://github.com/codecov/codecov-action
       - uses: codecov/codecov-action@v3
