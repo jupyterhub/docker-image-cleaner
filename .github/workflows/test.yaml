@@ -51,7 +51,10 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install --upgrade pip
-          pip install -r dev-requirements.txt .
+          pip install -e ".[test]"
+
+      - name: List Python dependencies
+        run: |
           pip freeze
 
       - name: Run pytest
