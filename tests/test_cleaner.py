@@ -12,7 +12,27 @@ here = Path(__file__).resolve().parent
 test_image = here.joinpath("test-image")
 
 
-def build_image(docker_client, tag, size_mb=1_000, fail=0):
+def _get_images_tags(docker_client, **kwargs):
+    """
+    Returns a sorted list of images' tags.
+
+    This list looks like ["alpine:3", "ubuntu:20.04", "ubuntu:22.04"].
+
+    docker client's images.list ref: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.list
+    """
+    images = docker_client.images.list(**kwargs)
+    tags = []
+    for image in images:
+        tags += image.tags
+    return sorted(tags)
+
+
+def _build_image(docker_client, tag, size_mb=1_000, fail=0):
+    """
+    Builds an image with a given tag and size.
+
+    docker client's images.build ref: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.build
+    """
     try:
         docker_client.images.build(
             path=str(test_image),
@@ -30,7 +50,7 @@ def build_image(docker_client, tag, size_mb=1_000, fail=0):
             raise RuntimeError("Should have failed!")
 
 
-def make_file(path, size_mb):
+def _make_file(path, size_mb):
     with open("/dev/zero", "rb") as r:
         mb = r.read(2**20)
 
@@ -54,40 +74,46 @@ def test_get_absolute_size(tmpdir):
 
     assert get_used() == 0
     # add a 1GB file
-    make_file(test_path.join("1gb"), 1024)
+    _make_file(test_path.join("1gb"), 1024)
     assert 0.9 < get_used() < 1.1
     # add another 1GB file
-    make_file(test_path.join("1gb.2"), 1024)
+    _make_file(test_path.join("1gb.2"), 1024)
     assert 1.9 < get_used() < 2.2
 
 
 def test_ps(dind):
-    assert dind.images.list() == []
+    """
+    Tests the dind fixture to provide a clean docker environment to test
+    against, with no existing images.
+    """
+    assert _get_images_tags(dind) == []
 
 
 def test_nothing_to_clean(dind, absolute_threshold, sleep_stops):
+    """
+    Tests pulling an image and running the cleaner with a high enough threshold
+    for the pulled image not be cleaned.
+    """
     dind.images.pull("ubuntu:22.04")
+
     with mock.patch.dict(
         os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": "2e9"}
     ), pytest.raises(Slept):
         cleaner.main()
 
-    assert [image.name for image in dind.images.list()] == ["ubuntu:22.04"]
+    assert _get_images_tags(dind) == ["ubuntu:22.04"]
 
 
 def test_clean_dangling(dind, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
 
-    def get_images(**kwargs):
-        return sorted(tuple(image.tags) for image in dind.images.list(**kwargs))
+    before_build = _get_images_tags(dind)
+    before_build_all = _get_images_tags(dind, all=True)
 
-    before_build = get_images()
-    before_build_all = get_images(all=True)
-
-    build_image(dind, tag="unused", size_mb=2_000, fail=1)
-    assert get_images() == before_build  # no new tagged image
+    _build_image(dind, tag="unused", size_mb=2_000, fail=1)
+    assert _get_images_tags(dind) == before_build  # no new tagged image
     # but there is something still to prune
-    assert len(get_images(all=True)) > len(before_build_all)
+    assert len(_get_images_tags(dind, all=True)) > len(before_build_all)
 
     # run clean
     with mock.patch.dict(
@@ -96,26 +122,23 @@ def test_clean_dangling(dind, absolute_threshold, sleep_stops):
         cleaner.main()
 
     # did not delete pre-existing image
-    assert get_images() == before_build
+    assert _get_images_tags(dind) == before_build
     # but did delete dangling images
-    assert get_images(all=True) == before_build_all
+    assert _get_images_tags(dind, all=True) == before_build_all
 
 
 def test_clean_all(dind, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
 
-    def get_images(**kwargs):
-        return sorted(tuple(image.tags) for image in dind.images.list(**kwargs))
-
-    before_build = get_images()
-    before_build_all = get_images(all=True)
+    before_build = _get_images_tags(dind)
+    before_build_all = _get_images_tags(dind, all=True)
 
     # build two images, one that fails (leaves dangles)
     # and one that succeeds
-    build_image(dind, tag="unused", size_mb=1_000, fail=1)
-    build_image(dind, tag="2gb", size_mb=2_000, fail=0)
-    after_build = ["2gb"] + get_images()
-    assert get_images() == after_build
+    _build_image(dind, tag="unused", size_mb=1_000, fail=1)
+    _build_image(dind, tag="2gb", size_mb=2_000, fail=0)
+    after_build = ["2gb"] + _get_images_tags(dind)
+    assert _get_images_tags(dind) == after_build
 
     # run clean with 2GB
     with mock.patch.dict(
@@ -125,6 +148,6 @@ def test_clean_all(dind, absolute_threshold, sleep_stops):
 
     # dangling images wasn't enough, pruned everything
     # did not delete pre-existing image
-    assert get_images() == []
+    assert _get_images_tags(dind) == []
     # but did delete dangling images
-    assert get_images(all=True) == []
+    assert _get_images_tags(dind, all=True) == []

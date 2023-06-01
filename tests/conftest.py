@@ -50,7 +50,13 @@ def dind_dir(tmpdir):
 
 @pytest.fixture
 def dind(tmpdir, host_docker, dind_image, dind_dir):
-    """Start docker-in-docker (dind)"""
+    """
+    This fixture starts a docker container (docker-in-docker aka. dind) on the
+    host system running a docker daemon (dockerd), and yield a docker client to
+    work against it, exposed via the network on port 2376.
+
+    docker client ref: https://docker-py.readthedocs.io/en/stable/client.html
+    """
     # start the container
     dind_mount = docker.types.Mount(
         type="bind",
