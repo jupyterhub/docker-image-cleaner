@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import time
@@ -6,6 +7,8 @@ from unittest import mock
 import docker
 import pytest
 import requests
+
+logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 
 dind_container_name = "test-image-cleaner-dind"
 
@@ -56,6 +59,7 @@ def dind(tmpdir, host_docker, dind_image, dind_dir):
     work against it, exposed via the network on port 2376.
 
     docker client ref: https://docker-py.readthedocs.io/en/stable/client.html
+    docker container.run ref: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
     """
     # start the container
     dind_mount = docker.types.Mount(

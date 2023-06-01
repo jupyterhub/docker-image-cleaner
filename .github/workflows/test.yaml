@@ -45,8 +45,14 @@ jobs:
           pip freeze
 
       - name: Run pytest
+        # if pytest is run without sudo, it won't have permissions to inspect
+        # /var/lib/docker and can't decide on when to clean etc either.
+        #
+        # FIXME: docker image cleaner should realize it doesn't have permissions
+        #        to estimate the disk usage in get_absolute_size
+        #
         run: |
-          pytest --maxfail=2 --cov=docker_image_cleaner
+          sudo -E PATH=$PATH bash -c "pytest --maxfail=2 --cov=docker_image_cleaner"
 
       # GitHub action reference: https://github.com/codecov/codecov-action
       - uses: codecov/codecov-action@v3

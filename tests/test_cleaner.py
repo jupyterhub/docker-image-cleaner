@@ -12,24 +12,47 @@ here = Path(__file__).resolve().parent
 test_image = here.joinpath("test-image")
 
 
-def _get_images_tags(docker_client, **kwargs):
+def _get_image_tags(docker_client):
     """
-    Returns a sorted list of images' tags.
+    Returns a sorted list of non-dangling images' tags.
 
-    This list looks like ["alpine:3", "ubuntu:20.04", "ubuntu:22.04"].
+    The return value can look like this:
+
+    - []
+    - ["alpine:3", "ubuntu:20.04", "ubuntu:22.04"]
 
     docker client's images.list ref: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.list
     """
-    images = docker_client.images.list(**kwargs)
+    images = docker_client.images.list(filters={"dangling": False})
     tags = []
     for image in images:
-        tags += image.tags
+        if image.tags:
+            tags += image.tags
     return sorted(tags)
 
 
-def _build_image(docker_client, tag, size_mb=1_000, fail=0):
+def _get_dangling_image_layer_ids(docker_client):
     """
-    Builds an image with a given tag and size.
+    Returns a sorted list of dangling images' ids.
+
+    The return value can look like this:
+
+    - []
+    - ["sha256:0123456789ab", "sha256:0123456789xy"]
+
+    docker client's images.list ref: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.list
+    """
+    images = docker_client.images.list(all=True, filters={"dangling": True})
+    ids = []
+    for image in images:
+        ids.append(image.short_id)
+    return sorted(ids)
+
+
+def _build_image(docker_client, tag, size_mb=1000, fail=0):
+    """
+    Attempts to build an image tag to a given size, and can be configured to
+    fail so that a dangling image is created.
 
     docker client's images.build ref: https://docker-py.readthedocs.io/en/stable/images.html#docker.models.images.ImageCollection.build
     """
@@ -81,73 +104,70 @@ def test_get_absolute_size(tmpdir):
     assert 1.9 < get_used() < 2.2
 
 
-def test_ps(dind):
-    """
-    Tests the dind fixture to provide a clean docker environment to test
-    against, with no existing images.
-    """
-    assert _get_images_tags(dind) == []
-
-
 def test_nothing_to_clean(dind, absolute_threshold, sleep_stops):
     """
     Tests pulling an image and running the cleaner with a high enough threshold
     for the pulled image not be cleaned.
     """
+    # expect no images and then pull one to check it won't get cleaned
+    assert _get_image_tags(dind) == []
+    assert _get_dangling_image_layer_ids(dind) == []
+
     dind.images.pull("ubuntu:22.04")
+    before_clean = _get_image_tags(dind)
+    assert before_clean == ["ubuntu:22.04"]
 
     with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": "2e9"}
+        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
     ), pytest.raises(Slept):
         cleaner.main()
 
-    assert _get_images_tags(dind) == ["ubuntu:22.04"]
+    # expect to not delete pre-existing image
+    assert _get_image_tags(dind) == before_clean
+
+    assert False
 
 
 def test_clean_dangling(dind, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
 
-    before_build = _get_images_tags(dind)
-    before_build_all = _get_images_tags(dind, all=True)
+    initial_tags = _get_image_tags(dind)
 
-    _build_image(dind, tag="unused", size_mb=2_000, fail=1)
-    assert _get_images_tags(dind) == before_build  # no new tagged image
-    # but there is something still to prune
-    assert len(_get_images_tags(dind, all=True)) > len(before_build_all)
+    # build an image, fail the build intentionally to create dangling image layers
+    _build_image(dind, tag="test:dangling", size_mb=1_100, fail=1)
+    assert _get_image_tags(dind) == initial_tags
+    assert len(_get_dangling_image_layer_ids(dind)) > 0
 
     # run clean
     with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": "2e9"}
+        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
     ), pytest.raises(Slept):
         cleaner.main()
 
-    # did not delete pre-existing image
-    assert _get_images_tags(dind) == before_build
-    # but did delete dangling images
-    assert _get_images_tags(dind, all=True) == before_build_all
+    # expect to not delete pre-existing image, but the new dangling image layers
+    assert _get_image_tags(dind) == initial_tags
+    assert len(_get_dangling_image_layer_ids(dind)) == 0
+
+    assert False
 
 
 def test_clean_all(dind, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
 
-    before_build = _get_images_tags(dind)
-    before_build_all = _get_images_tags(dind, all=True)
+    initial_tags = _get_image_tags(dind)
 
-    # build two images, one that fails (leaves dangles)
-    # and one that succeeds
-    _build_image(dind, tag="unused", size_mb=1_000, fail=1)
-    _build_image(dind, tag="2gb", size_mb=2_000, fail=0)
-    after_build = ["2gb"] + _get_images_tags(dind)
-    assert _get_images_tags(dind) == after_build
+    # build two images, fail one build intentionally to create dangling image layers
+    _build_image(dind, tag="test:dangling", size_mb=100, fail=1)
+    _build_image(dind, tag="test:too-large", size_mb=1_100, fail=0)
+    assert len(_get_image_tags(dind)) > len(initial_tags)
 
-    # run clean with 2GB
     with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": "2e9"}
+        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
     ), pytest.raises(Slept):
         cleaner.main()
 
-    # dangling images wasn't enough, pruned everything
-    # did not delete pre-existing image
-    assert _get_images_tags(dind) == []
-    # but did delete dangling images
-    assert _get_images_tags(dind, all=True) == []
+    # deleted dangling images...
+    assert _get_dangling_image_layer_ids(dind) == []
+
+    # and new too large image, but not the small pre-existing image
+    assert _get_image_tags(dind) == initial_tags
