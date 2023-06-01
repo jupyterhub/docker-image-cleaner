@@ -104,7 +104,7 @@ def test_get_absolute_size(tmpdir):
     assert 1.9 < get_used() < 2.2
 
 
-def test_nothing_to_clean(dind, dind_dir, absolute_threshold, sleep_stops):
+def test_clean_nothing(dind, dind_dir, absolute_threshold, sleep_stops):
     """
     Tests pulling an image and running the cleaner with a high enough threshold
     for the pulled image not be cleaned.
@@ -130,6 +130,11 @@ def test_nothing_to_clean(dind, dind_dir, absolute_threshold, sleep_stops):
 
 
 def test_clean_dangling(dind, dind_dir, absolute_threshold, sleep_stops):
+    """
+    Tests pulling an image, creating dangling image layers, and running the
+    cleaner with a high enough threshold for the pulled image not be cleaned
+    after the dangling image layers was cleaned.
+    """
     assert 0.1 > cleaner.get_absolute_size(dind_dir)
 
     dind.images.pull("ubuntu:22.04")
@@ -157,6 +162,11 @@ def test_clean_dangling(dind, dind_dir, absolute_threshold, sleep_stops):
 
 
 def test_clean_all(dind, dind_dir, absolute_threshold, sleep_stops):
+    """
+    Tests pulling an image, creating dangling image layers and a non-dangling
+    image, then running the cleaner forced to clean up non-dangling image layers
+    as well.
+    """
     dind.images.pull("ubuntu:22.04")
     assert 1 > cleaner.get_absolute_size(dind_dir) > 0.1
 
