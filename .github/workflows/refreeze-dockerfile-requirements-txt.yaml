@@ -7,7 +7,6 @@ on:
   push:
     paths:
       - "**/requirements.in"
-      - "**/requirements.txt"
       - ".github/workflows/refreeze-dockerfile-requirements-txt.yaml"
     branches: ["main"]
   schedule:
