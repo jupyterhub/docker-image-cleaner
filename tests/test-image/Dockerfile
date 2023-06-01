@@ -6,6 +6,6 @@ ARG FAIL=0
 ARG SIZE_MB=1000
 
 USER root
-RUN dd if=/dev/zero bs=1M count=$SIZE_MB
+RUN dd if=/dev/urandom bs=1M count=$SIZE_MB of=newfile
 
 RUN exit $FAIL

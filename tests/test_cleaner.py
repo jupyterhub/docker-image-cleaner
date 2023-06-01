@@ -104,7 +104,7 @@ def test_get_absolute_size(tmpdir):
     assert 1.9 < get_used() < 2.2
 
 
-def test_nothing_to_clean(dind, absolute_threshold, sleep_stops):
+def test_nothing_to_clean(dind, dind_dir, absolute_threshold, sleep_stops):
     """
     Tests pulling an image and running the cleaner with a high enough threshold
     for the pulled image not be cleaned.
@@ -112,10 +112,12 @@ def test_nothing_to_clean(dind, absolute_threshold, sleep_stops):
     # expect no images and then pull one to check it won't get cleaned
     assert _get_image_tags(dind) == []
     assert _get_dangling_image_layer_ids(dind) == []
+    assert 0.1 > cleaner.get_absolute_size(dind_dir)
 
     dind.images.pull("ubuntu:22.04")
     before_clean = _get_image_tags(dind)
     assert before_clean == ["ubuntu:22.04"]
+    assert cleaner.get_absolute_size(dind_dir) > 0.1
 
     with mock.patch.dict(
         os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
@@ -124,17 +126,21 @@ def test_nothing_to_clean(dind, absolute_threshold, sleep_stops):
 
     # expect to not delete pre-existing image
     assert _get_image_tags(dind) == before_clean
+    assert cleaner.get_absolute_size(dind_dir) > 0.1
 
-    assert False
 
+def test_clean_dangling(dind, dind_dir, absolute_threshold, sleep_stops):
+    assert 0.1 > cleaner.get_absolute_size(dind_dir)
 
-def test_clean_dangling(dind, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
+    assert 1 > cleaner.get_absolute_size(dind_dir) > 0.1
 
     initial_tags = _get_image_tags(dind)
 
     # build an image, fail the build intentionally to create dangling image layers
-    _build_image(dind, tag="test:dangling", size_mb=1_100, fail=1)
+    _build_image(dind, tag="test:dangling", size_mb=500, fail=1)
+    assert cleaner.get_absolute_size(dind_dir) > 1
+
     assert _get_image_tags(dind) == initial_tags
     assert len(_get_dangling_image_layer_ids(dind)) > 0
 
@@ -147,27 +153,35 @@ def test_clean_dangling(dind, absolute_threshold, sleep_stops):
     # expect to not delete pre-existing image, but the new dangling image layers
     assert _get_image_tags(dind) == initial_tags
     assert len(_get_dangling_image_layer_ids(dind)) == 0
+    assert 1 > cleaner.get_absolute_size(dind_dir) > 0.1
 
-    assert False
 
-
-def test_clean_all(dind, absolute_threshold, sleep_stops):
+def test_clean_all(dind, dind_dir, absolute_threshold, sleep_stops):
     dind.images.pull("ubuntu:22.04")
+    assert 1 > cleaner.get_absolute_size(dind_dir) > 0.1
 
     initial_tags = _get_image_tags(dind)
 
     # build two images, fail one build intentionally to create dangling image layers
+    assert len(_get_dangling_image_layer_ids(dind)) == 0
     _build_image(dind, tag="test:dangling", size_mb=100, fail=1)
-    _build_image(dind, tag="test:too-large", size_mb=1_100, fail=0)
+    assert len(_get_dangling_image_layer_ids(dind)) > 0
+    assert 0.1 < cleaner.get_absolute_size(dind_dir) < 1
+
+    _build_image(dind, tag="test:too-large", size_mb=500, fail=0)
     assert len(_get_image_tags(dind)) > len(initial_tags)
+    assert cleaner.get_absolute_size(dind_dir) > 1
 
     with mock.patch.dict(
         os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
     ), pytest.raises(Slept):
         cleaner.main()
 
-    # deleted dangling images...
+    # deleted dangling images as the first action to remedy the situation...
+    assert cleaner.get_absolute_size(dind_dir) < 1
     assert _get_dangling_image_layer_ids(dind) == []
 
-    # and new too large image, but not the small pre-existing image
-    assert _get_image_tags(dind) == initial_tags
+    # ... and new too large image, but also the pre-existing image because
+    # everything goes at this point
+    assert 0.1 > cleaner.get_absolute_size(dind_dir)
+    assert _get_image_tags(dind) == []
