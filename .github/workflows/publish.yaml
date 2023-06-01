@@ -26,12 +26,12 @@ on:
 
 jobs:
   build-and-publish-package:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: install build package
         run: |
@@ -52,12 +52,12 @@ jobs:
           password: ${{ secrets.pypi_password }}
 
   build-and-publish-image:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       # This action will output a list of useful image tags.
       #
