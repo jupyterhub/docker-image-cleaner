@@ -151,8 +151,8 @@ def main():
     elif threshold_type == "absolute":
         get_used = get_absolute_size
         used_msg = "{used:.2f}GB used"
-        threshold_s = f"{threshold_high // GB:.0f}GB"
-        if threshold_high <= 2**30:
+        threshold_s = f"{threshold_high / GB:.2f}GB"
+        if threshold_high < GB:
             raise ValueError(
                 f"Absolute GC threshold should be at least 1GB, got {threshold_high}B"
             )
