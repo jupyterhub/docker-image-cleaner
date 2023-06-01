@@ -34,7 +34,7 @@ def host_docker():
 
 @pytest.fixture(scope="session")
 def dind_image(host_docker):
-    dind_image = "docker:20-dind"
+    dind_image = "docker:24-dind"
     host_docker.images.pull(dind_image)
     return dind_image
 
