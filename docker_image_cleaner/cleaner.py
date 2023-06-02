@@ -137,6 +137,14 @@ def main():
     threshold_high = float(os.getenv("DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH", "80"))
     timeout_seconds = int(os.getenv("DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS", "300"))
 
+    logging.info("Starting docker image cleaning with the following settings:")
+    logging.info(f"DOCKER_IMAGE_CLEANER_PATH_TO_CHECK={path_to_check}")
+    logging.info(f"DOCKER_IMAGE_CLEANER_INTERVAL_SECONDS={interval_seconds}")
+    logging.info(f"DOCKER_IMAGE_CLEANER_DELAY_SECONDS={delay_seconds}")
+    logging.info(f"DOCKER_IMAGE_CLEANER_THRESHOLD_TYPE={threshold_type}")
+    logging.info(f"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH={threshold_high}")
+    logging.info(f"DOCKER_IMAGE_CLEANER_TIMEOUT_SECONDS={timeout_seconds}")
+
     docker_client = docker.from_env(version="auto", timeout=timeout_seconds)
 
     # with the threshold type set to relative the thresholds are interpreted
@@ -151,8 +159,8 @@ def main():
     elif threshold_type == "absolute":
         get_used = get_absolute_size
         used_msg = "{used:.2f}GB used"
-        threshold_s = f"{threshold_high // GB:.0f}GB"
-        if threshold_high <= 2**30:
+        threshold_s = f"{threshold_high / GB:.2f}GB"
+        if threshold_high < GB:
             raise ValueError(
                 f"Absolute GC threshold should be at least 1GB, got {threshold_high}B"
             )

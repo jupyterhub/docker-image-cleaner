@@ -1,3 +1,0 @@
-# pip-tools include pip-compile that can be useful to manually update
-# requirements.txt based on requirements.in using the command "pip-compile"
-pip-tools

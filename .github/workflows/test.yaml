@@ -1,0 +1,68 @@
+name: Test
+
+on:
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/test.yaml"
+  push:
+    paths-ignore:
+      - "**.md"
+      - ".github/workflows/*"
+      - "!.github/workflows/test.yaml"
+    branches-ignore:
+      - "dependabot/**"
+      - "pre-commit-ci-update-config"
+    tags:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # We run tests against various versions of the docker api provided by
+          # dockerd, itself running inside a docker container on the host
+          # system.
+          #
+          # ref: https://hub.docker.com/_/docker/tags?page=1&name=dind
+          #
+          - python-version: "3.8"
+            docker-api-providing-image: docker:20-dind
+          - python-version: "3.9"
+            docker-api-providing-image: docker:23-dind
+          - python-version: "3.10"
+            docker-api-providing-image: docker:24-dind
+          - python-version: "3.11"
+            docker-api-providing-image: docker:dind
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[test]"
+
+      - name: List Python dependencies
+        run: |
+          pip freeze
+
+      - name: Run pytest
+        # pytest is run with sudo, as it seems to need it for permissions to
+        # inspect /var/lib/docker and cleanup built images after tests complete
+        # without erroring.
+        #
+        run: |
+          sudo -E PATH=$PATH bash -c "pytest --docker-api-providing-image=${{ matrix.docker-api-providing-image }} --cov=docker_image_cleaner"
+
+      # GitHub action reference: https://github.com/codecov/codecov-action
+      - uses: codecov/codecov-action@v3

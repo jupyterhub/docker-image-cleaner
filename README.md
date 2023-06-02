@@ -1,8 +1,11 @@
 # Docker Image Cleaner
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jupyterhub/docker-image-cleaner/Publish?logo=github)](https://github.com/jupyterhub/docker-image-cleaner/actions)
 [![Latest PyPI version](https://img.shields.io/pypi/v/docker-image-cleaner?logo=pypi)](https://pypi.python.org/pypi/docker-image-cleaner)
 [![Latest quay.io image tags](https://img.shields.io/github/v/tag/jupyterhub/docker-image-cleaner?include_prereleases&label=quay.io)](https://quay.io/repository/jupyterhub/docker-image-cleaner?tab=tags)
+[![GitHub Workflow Status - Test](https://img.shields.io/github/actions/workflow/status/jupyterhub/docker-image-cleaner/test.yaml?logo=github&label=tests)](https://github.com/jupyterhub/docker-image-cleaner/actions)
+[![Test coverage of code](https://codecov.io/gh/jupyterhub/docker-image-cleaner/branch/main/graph/badge.svg)](https://codecov.io/gh/jupyterhub/docker-image-cleaner)
+[![Issue tracking - GitHub](https://img.shields.io/badge/issue_tracking-github-blue?logo=github)](https://github.com/jupyterhub/docker-image-cleaner/issues)
+[![Help forum - Discourse](https://img.shields.io/badge/help_forum-discourse-blue?logo=discourse)](https://discourse.jupyter.org/c/jupyterhub)
 
 A Python package (`docker-image-cleaner`) and associated Docker image
 (`quay.io/jupyterhub/docker-image-cleaner`) to clean up old docker images when a

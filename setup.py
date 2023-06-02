@@ -15,7 +15,6 @@ setup(
     # SemVer 2: https://semver.org
     #
     version="1.0.0-beta.3",
-    python_requires=">=3.8",
     author="Project Jupyter Contributors",
     author_email="jupyter@googlegroups.com",
     license="BSD",
@@ -24,10 +23,17 @@ setup(
     description="Cleanup old docker images to free up disk space and inodes",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    install_requires=requirements,
     entry_points={
         "console_scripts": [
             "docker-image-cleaner = docker_image_cleaner.__main__:main",
         ]
+    },
+    python_requires=">=3.8",
+    install_requires=requirements,
+    extras_require={
+        "test": [
+            "pytest",
+            "pytest-cov",
+        ],
     },
 )
