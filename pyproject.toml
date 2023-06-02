@@ -38,4 +38,5 @@ target_version = [
 #
 [tool.pytest.ini_options]
 addopts = "--verbose --color=yes --maxfail=2 --durations=10"
+log_level = "INFO"
 testpaths = ["tests"]
