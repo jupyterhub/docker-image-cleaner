@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 import time
@@ -7,8 +6,6 @@ from unittest import mock
 import docker
 import pytest
 import requests
-
-logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
 
 dind_container_name = "test-image-cleaner-dind"
 
