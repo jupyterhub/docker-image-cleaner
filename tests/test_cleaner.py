@@ -195,3 +195,8 @@ def test_clean_all(dind, dind_dir, absolute_threshold, sleep_stops):
     # everything goes at this point
     assert 0.1 > cleaner.get_absolute_size(dind_dir)
     assert _get_image_tags(dind) == []
+
+
+def test_get_absolute_size_no_such_dir(tmpdir):
+    with pytest.raises(FileNotFoundError):
+        cleaner.get_absolute_size(tmpdir.join("nosuchdir"))

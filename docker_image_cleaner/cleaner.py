@@ -28,6 +28,9 @@ def get_absolute_size(path):
     """
     Directory size in gigabytes
     """
+    # first, check permissions, existence of path with os.listdir
+    # os.walk returns an empty list if it doesn't find anything
+    os.listdir(path)
     total = 0
     for dirpath, dirnames, filenames in os.walk(path):
         for fname in filenames:
