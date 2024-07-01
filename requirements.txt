@@ -6,7 +6,7 @@
 #
 cachetools==5.3.3
     # via google-auth
-certifi==2024.2.2
+certifi==2024.6.2
     # via
     #   kubernetes
     #   requests
@@ -14,11 +14,11 @@ charset-normalizer==3.3.2
     # via requests
 docker==7.1.0
     # via -r requirements.in
-google-auth==2.29.0
+google-auth==2.30.0
     # via kubernetes
 idna==3.7
     # via requests
-kubernetes==29.0.0
+kubernetes==30.1.0
     # via -r requirements.in
 oauthlib==3.2.2
     # via
@@ -48,7 +48,7 @@ six==1.16.0
     # via
     #   kubernetes
     #   python-dateutil
-urllib3==2.2.1
+urllib3==2.2.2
     # via
     #   docker
     #   kubernetes
