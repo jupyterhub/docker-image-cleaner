@@ -4,9 +4,9 @@
 #
 #    Use "Run workflow" button at https://github.com/jupyterhub/docker-image-cleaner/actions/workflows/refreeze-dockerfile-requirements-txt.yaml
 #
-cachetools==5.4.0
+cachetools==5.5.0
     # via google-auth
-certifi==2024.7.4
+certifi==2024.8.30
     # via
     #   kubernetes
     #   requests
@@ -14,9 +14,9 @@ charset-normalizer==3.3.2
     # via requests
 docker==7.1.0
     # via -r requirements.in
-google-auth==2.32.0
+google-auth==2.34.0
     # via kubernetes
-idna==3.7
+idna==3.8
     # via requests
 kubernetes==30.1.0
     # via -r requirements.in
@@ -32,7 +32,7 @@ pyasn1-modules==0.4.0
     # via google-auth
 python-dateutil==2.9.0.post0
     # via kubernetes
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via kubernetes
 requests==2.32.3
     # via
