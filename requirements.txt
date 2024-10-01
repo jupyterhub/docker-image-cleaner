@@ -14,21 +14,23 @@ charset-normalizer==3.3.2
     # via requests
 docker==7.1.0
     # via -r requirements.in
-google-auth==2.34.0
+durationpy==0.8
     # via kubernetes
-idna==3.8
+google-auth==2.35.0
+    # via kubernetes
+idna==3.10
     # via requests
-kubernetes==30.1.0
+kubernetes==31.0.0
     # via -r requirements.in
 oauthlib==3.2.2
     # via
     #   kubernetes
     #   requests-oauthlib
-pyasn1==0.6.0
+pyasn1==0.6.1
     # via
     #   pyasn1-modules
     #   rsa
-pyasn1-modules==0.4.0
+pyasn1-modules==0.4.1
     # via google-auth
 python-dateutil==2.9.0.post0
     # via kubernetes
@@ -48,7 +50,7 @@ six==1.16.0
     # via
     #   kubernetes
     #   python-dateutil
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   docker
     #   kubernetes
