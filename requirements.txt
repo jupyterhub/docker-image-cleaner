@@ -10,11 +10,11 @@ certifi==2024.8.30
     # via
     #   kubernetes
     #   requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 docker==7.1.0
     # via -r requirements.in
-durationpy==0.8
+durationpy==0.9
     # via kubernetes
 google-auth==2.35.0
     # via kubernetes
