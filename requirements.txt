@@ -16,7 +16,7 @@ docker==7.1.0
     # via -r requirements.in
 durationpy==0.9
     # via kubernetes
-google-auth==2.35.0
+google-auth==2.36.0
     # via kubernetes
 idna==3.10
     # via requests
