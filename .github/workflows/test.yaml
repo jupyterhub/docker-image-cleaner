@@ -65,4 +65,4 @@ jobs:
           sudo -E PATH=$PATH bash -c "pytest --docker-api-providing-image=${{ matrix.docker-api-providing-image }} --cov=docker_image_cleaner"
 
       # GitHub action reference: https://github.com/codecov/codecov-action
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
