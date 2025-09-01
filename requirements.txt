@@ -6,11 +6,11 @@
 #
 cachetools==5.5.2
     # via google-auth
-certifi==2025.7.14
+certifi==2025.8.3
     # via
     #   kubernetes
     #   requests
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 docker==7.1.0
     # via -r requirements.in
@@ -36,7 +36,7 @@ python-dateutil==2.9.0.post0
     # via kubernetes
 pyyaml==6.0.2
     # via kubernetes
-requests==2.32.4
+requests==2.32.5
     # via
     #   -r requirements.in
     #   docker
