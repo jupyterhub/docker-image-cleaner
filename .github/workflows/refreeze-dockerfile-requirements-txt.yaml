@@ -29,7 +29,7 @@ jobs:
     environment: refreeze-dockerfile-requirements-txt
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Refreeze Dockerfile's requirements.txt based on requirements.in
         run: |
