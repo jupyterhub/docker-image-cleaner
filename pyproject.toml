@@ -1,3 +1,38 @@
+[build-system]
+requires = ["setuptools>=77", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docker-image-cleaner"
+license = "BSD-3-Clause"
+# match semver pattern here for docker,
+# ('1.0.0-beta.3', not PEP440 `1.0.0b3`)
+# build tools will normalize
+version = "1.0.0-beta.3"
+dynamic = ["readme", "dependencies"]
+description = "Cleanup old docker images to free up disk space and inodes"
+authors = [
+    { name = "Project Jupyter Contributors", email = "jupyter@googlegroups.com" },
+]
+requires-python = ">=3.10"
+
+[project.urls]
+Source = "https://github.com/jupyterhub/docker-image-cleaner"
+
+[project.scripts]
+docker-image-cleaner = "docker_image_cleaner.__main__:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+# dynamic sources of metadata in other files
+[tool.setuptools.dynamic]
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = { file = "requirements.in" }
+
 # autoflake is used for autoformatting Python code
 #
 # ref: https://github.com/PyCQA/autoflake#readme
@@ -22,14 +57,6 @@ profile = "black"
 # ref: https://black.readthedocs.io/en/stable/
 #
 [tool.black]
-# target-version should be all supported versions, see
-# https://github.com/psf/black/issues/751#issuecomment-473066811
-target_version = [
-    "py38",
-    "py39",
-    "py310",
-    "py311",
-]
 
 
 # pytest is used for running Python based tests
