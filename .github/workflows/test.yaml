@@ -33,11 +33,11 @@ jobs:
           # ref: https://hub.docker.com/_/docker/tags?page=1&name=dind
           #
           - python-version: "3.10"
-            docker-api-providing-image: docker:20-dind
+            docker-api-providing-image: docker:25-dind
           - python-version: "3.11"
-            docker-api-providing-image: docker:23-dind
+            docker-api-providing-image: docker:28-dind
           - python-version: "3.12"
-            docker-api-providing-image: docker:24-dind
+            docker-api-providing-image: docker:29-dind
           - python-version: "3.13"
             docker-api-providing-image: docker:dind
 
