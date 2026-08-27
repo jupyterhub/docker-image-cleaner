@@ -119,9 +119,12 @@ def test_clean_nothing(dind, dind_dir, absolute_threshold, sleep_stops):
     assert before_clean == ["ubuntu:22.04"]
     assert cleaner.get_absolute_size(dind_dir) > 0.1
 
-    with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
-    ), pytest.raises(Slept):
+    with (
+        mock.patch.dict(
+            os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
+        ),
+        pytest.raises(Slept),
+    ):
         cleaner.main()
 
     # expect to not delete pre-existing image
@@ -150,9 +153,12 @@ def test_clean_dangling(dind, dind_dir, absolute_threshold, sleep_stops):
     assert len(_get_dangling_image_layer_ids(dind)) > 0
 
     # run clean
-    with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
-    ), pytest.raises(Slept):
+    with (
+        mock.patch.dict(
+            os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
+        ),
+        pytest.raises(Slept),
+    ):
         cleaner.main()
 
     # expect to not delete pre-existing image, but the new dangling image layers
@@ -182,9 +188,12 @@ def test_clean_all(dind, dind_dir, absolute_threshold, sleep_stops):
     assert len(_get_image_tags(dind)) > len(initial_tags)
     assert cleaner.get_absolute_size(dind_dir) > 1
 
-    with mock.patch.dict(
-        os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
-    ), pytest.raises(Slept):
+    with (
+        mock.patch.dict(
+            os.environ, {"DOCKER_IMAGE_CLEANER_THRESHOLD_HIGH": f"{cleaner.GB}"}
+        ),
+        pytest.raises(Slept),
+    ):
         cleaner.main()
 
     # deleted dangling images as the first action to remedy the situation...
