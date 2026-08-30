@@ -54,8 +54,8 @@ def get_used_percent(path):
     which ever reports as the most full.
     """
     stat = os.statvfs(path)
-    inodes_avail = stat.f_favail / stat.f_files
-    blocks_avail = stat.f_bavail / stat.f_blocks
+    inodes_avail = stat.f_favail / stat.f_files if stat.f_files > 0 else 1.0
+    blocks_avail = stat.f_bavail / stat.f_blocks if stat.f_blocks > 0 else 1.0
     return 100 * (1 - min(blocks_avail, inodes_avail))
 
 
