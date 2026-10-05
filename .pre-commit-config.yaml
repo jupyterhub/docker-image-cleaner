@@ -19,7 +19,7 @@ repos:
 
   # Autoformat: Python code
   - repo: https://github.com/PyCQA/autoflake
-    rev: 6d9dd2716540ab776f29c7b896cd3052ef4619b2  # frozen: v2.4.0
+    rev: 6d9dd2716540ab776f29c7b896cd3052ef4619b2 # frozen: v2.4.0
     hooks:
       - id: autoflake
         # args ref: https://github.com/PyCQA/autoflake#advanced-usage
@@ -28,19 +28,19 @@ repos:
 
   # Autoformat: Python code
   - repo: https://github.com/pycqa/isort
-    rev: 9f905615631c545f5aea2516508109350d1d2f7d  # frozen: 9.0.2
+    rev: 9f905615631c545f5aea2516508109350d1d2f7d # frozen: 9.0.2
     hooks:
       - id: isort
 
   # Autoformat: Python code
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 96ae3e5802f3fe2d551e703e18f0a367d1a81ac2  # frozen: 26.10.0
+    rev: 96ae3e5802f3fe2d551e703e18f0a367d1a81ac2 # frozen: 26.10.0
     hooks:
       - id: black
 
   # Autoformat: markdown, yaml, javascript (see the file .prettierignore)
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: ef4a397f916211b4a39ccf9d3d9cbb6562157251  # frozen: v3.9.9
+    rev: ef4a397f916211b4a39ccf9d3d9cbb6562157251 # frozen: v3.9.9
     hooks:
       - id: prettier
 
@@ -55,7 +55,7 @@ repos:
 
   # Linting: Python code (see the file .flake8)
   - repo: https://github.com/PyCQA/flake8
-    rev: "cfbbfdeb2391c14a37e101e92a77f54f329e1726"  # frozen: 7.4.1
+    rev: "cfbbfdeb2391c14a37e101e92a77f54f329e1726" # frozen: 7.4.1
     hooks:
       - id: flake8
 
